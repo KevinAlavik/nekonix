@@ -15,7 +15,7 @@ $(call USER_VARIABLE,NASMFLAGS,-F dwarf -g)
 $(call USER_VARIABLE,LDFLAGS,)
 
 ifneq ($(shell ( test '$(MAKECMDGOALS)' = clean || test '$(MAKECMDGOALS)' = distclean ); echo $$?),0)
-    ifeq ($(shell ( ! test -d freestnd-c-hdrs-0bsd || ! test -d cc-runtime || ! test -f src/limine.h ); echo $$?),0)
+    ifeq ($(shell ( ! test -d freestnd-c-hdrs-0bsd || ! test -d cc-runtime || ! test -f include/boot/limine.h ); echo $$?),0)
         $(error Please run the ./get-deps script first)
     endif
 endif
@@ -49,8 +49,8 @@ override CFLAGS += \
     -mcmodel=kernel
 
 override CPPFLAGS := \
-    -I src \
     -isystem freestnd-c-hdrs-0bsd \
+    -I include \
     $(CPPFLAGS) \
     -MMD \
     -MP
@@ -109,7 +109,7 @@ clean:
 
 .PHONY: distclean
 distclean: clean
-	rm -rf freestnd-c-hdrs-0bsd cc-runtime src/limine.h
+	rm -rf freestnd-c-hdrs-0bsd cc-runtime include/boot/limine.h
 
 .PHONY: install
 install: all
