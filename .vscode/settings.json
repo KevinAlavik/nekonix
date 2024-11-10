@@ -5,6 +5,7 @@
         "nanoprintf.h": "c",
         "stdio.h": "c",
         "cpu.h": "c",
-        "random": "c"
+        "random": "c",
+        "stdarg.h": "c"
     }
 }

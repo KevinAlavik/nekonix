@@ -21,10 +21,15 @@ void *stdout = NULL;
 u16 _stdout_port = 0x3F8;
 spinlock_t stdout_lock;
 
-int putchar(int c)
+int (*putchar_impl)(char c) = NULL;
+
+int putchar(char c)
 {
-    outb(_stdout_port, c);
-    return c;
+    if (putchar_impl)
+    {
+        return putchar_impl(c);
+    }
+    return -1;
 }
 
 int puts(const char *str)
@@ -63,7 +68,10 @@ int vfprintf(void *stream, const char *fmt, va_list args)
 
     if (length >= 0 && length < (int)sizeof(buffer))
     {
-        outstr(_stdout_port, buffer);
+        for (int i = 0; i < length; i++)
+        {
+            putchar(buffer[i]);
+        }
     }
 
     return length;

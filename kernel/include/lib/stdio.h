@@ -8,7 +8,8 @@ extern void *stdout;
 extern u16 _stdout_port;
 extern spinlock_t stdout_lock;
 
-int putchar(int c);
+extern int (*putchar_impl)(char c);
+
 int puts(const char *s);
 int vprintf(const char *fmt, va_list args);
 int printf(const char *fmt, ...);
