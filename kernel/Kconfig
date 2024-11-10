@@ -1,0 +1,20 @@
+menu "NNix Kernel Config"
+
+choice
+    prompt "Build Type"
+    default BUILD_RELEASE
+
+config BUILD_DEBUG
+    bool "Debug"
+    help
+        Build the kernel with debugging enabled, providing extra logging
+        and assertions for development purposes.
+
+config BUILD_RELEASE
+    bool "Release"
+    help
+        Build the kernel with optimizations and minimal logging for production use.
+
+endchoice
+
+endmenu

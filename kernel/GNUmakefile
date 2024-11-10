@@ -14,11 +14,12 @@ $(call USER_VARIABLE,CPPFLAGS,)
 $(call USER_VARIABLE,NASMFLAGS,-F dwarf -g)
 $(call USER_VARIABLE,LDFLAGS,)
 
-ifneq ($(shell ( test '$(MAKECMDGOALS)' = clean || test '$(MAKECMDGOALS)' = distclean ); echo $$?),0)
+ifneq ($(shell ( test '$(MAKECMDGOALS)' = clean || test '$(MAKECMDGOALS)' = distclean || test '$(MAKECMDGOALS)' = menuconfig ); echo $$?),0)
     ifeq ($(shell ( ! test -d freestnd-c-hdrs-0bsd || ! test -d cc-runtime || ! test -f include/boot/limine.h || ! test -f include/lib/nanoprintf.h ); echo $$?),0)
         $(error Please run the ./get-deps script first)
     endif
 endif
+
 
 override CC_IS_CLANG := $(shell ! $(CC) --version 2>/dev/null | grep 'clang' >/dev/null 2>&1; echo $$?)
 
@@ -51,7 +52,7 @@ override CFLAGS += \
 override CPPFLAGS := \
     -isystem freestnd-c-hdrs-0bsd \
     -I include \
-    $(CPPFLAGS) \
+	$(CPPFLAGS) \
     -MMD \
     -MP
 
@@ -73,8 +74,31 @@ override NASMFILES := $(shell cd src && find -L * -type f -name '*.asm' | LC_ALL
 override OBJ := $(addprefix obj/,$(CFILES:.c=.c.o) $(ASFILES:.S=.S.o) $(NASMFILES:.asm=.asm.o))
 override HEADER_DEPS := $(addprefix obj/,$(CFILES:.c=.c.d) $(ASFILES:.S=.S.d))
 
+include .config 
+CONFIG_FLAGS :=
+
+VERSION_MAJOR   := 0
+VERSION_MINOR   := 1
+VERSION_PATCH   := 1
+VERSION_NOTE    := -nnix
+
+ifeq ($(CONFIG_BUILD_DEBUG),y)
+	CONFIG_FLAGS += \
+		-D_DEBUG
+	VERSION_NOTE += -dev
+endif
+
+ifeq ($(CONFIG_BUILD_RELEASE),y)
+	CONFIG_FLAGS += \
+		-D_RELEASE
+	VERSION_NOTE += -release
+endif
+
+VERSION_NOTE := $(shell echo $(VERSION_NOTE) | tr -d '[:space:]')
+CONFIG_FLAGS += -DVERSION_MAJOR=\"$(VERSION_MAJOR)\" -DVERSION_MINOR=\"$(VERSION_MINOR)\" -DVERSION_PATCH=\"$(VERSION_PATCH)\" -DVERSION_NOTE=\"$(VERSION_NOTE)\"
+
 .PHONY: all
-all: bin/$(OUTPUT)
+all: .config bin/$(OUTPUT)
 
 cc-runtime-x86_64/cc-runtime.a: cc-runtime/*
 	rm -rf cc-runtime-x86_64
@@ -93,11 +117,11 @@ bin/$(OUTPUT): GNUmakefile linker.ld $(OBJ) cc-runtime-x86_64/cc-runtime.a
 
 obj/%.c.o: src/%.c GNUmakefile
 	mkdir -p "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CONFIG_FLAGS) -c $< -o $@
 
 obj/%.S.o: src/%.S GNUmakefile
 	mkdir -p "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CONFIG_FLAGS) -c $< -o $@
 
 obj/%.asm.o: src/%.asm GNUmakefile
 	mkdir -p "$$(dirname $@)"
@@ -109,14 +133,18 @@ clean:
 
 .PHONY: distclean
 distclean: clean
-	rm -rf freestnd-c-hdrs-0bsd cc-runtime include/boot/limine.h include/lib/nanoprintf.h
+	rm -rf freestnd-c-hdrs-0bsd cc-runtime include/boot/limine.h include/lib/nanoprintf.h .config .config.old
 
 .PHONY: install
 install: all
 	install -d "$(DESTDIR)$(PREFIX)/share/$(OUTPUT)"
 	install -m 644 bin/$(OUTPUT) "$(DESTDIR)$(PREFIX)/share/$(OUTPUT)/"
 
-.PHONY: uninstall
+.PHONY: uninstall	
 uninstall:
 	rm -f "$(DESTDIR)$(PREFIX)/share/$(OUTPUT)/$(OUTPUT)"
 	-rmdir "$(DESTDIR)$(PREFIX)/share/$(OUTPUT)"
+
+.PHONY: menuconfig
+menuconfig: Kconfig
+	@kconfig-mconf Kconfig
