@@ -15,7 +15,7 @@ $(call USER_VARIABLE,NASMFLAGS,-F dwarf -g)
 $(call USER_VARIABLE,LDFLAGS,)
 
 ifneq ($(shell ( test '$(MAKECMDGOALS)' = clean || test '$(MAKECMDGOALS)' = distclean ); echo $$?),0)
-    ifeq ($(shell ( ! test -d freestnd-c-hdrs-0bsd || ! test -d cc-runtime || ! test -f include/boot/limine.h ); echo $$?),0)
+    ifeq ($(shell ( ! test -d freestnd-c-hdrs-0bsd || ! test -d cc-runtime || ! test -f include/boot/limine.h || ! test -f include/lib/nanoprintf.h ); echo $$?),0)
         $(error Please run the ./get-deps script first)
     endif
 endif
@@ -109,7 +109,7 @@ clean:
 
 .PHONY: distclean
 distclean: clean
-	rm -rf freestnd-c-hdrs-0bsd cc-runtime include/boot/limine.h
+	rm -rf freestnd-c-hdrs-0bsd cc-runtime include/boot/limine.h include/lib/nanoprintf.h
 
 .PHONY: install
 install: all

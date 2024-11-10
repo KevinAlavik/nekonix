@@ -4,3 +4,4 @@
 *.iso
 *.hdd
 limine.h
+nanoprintf.h
