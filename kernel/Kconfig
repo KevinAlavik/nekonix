@@ -17,4 +17,10 @@ config BUILD_RELEASE
 
 endchoice
 
+config GRAPHICAL_BOOT_LOGS
+    bool "Graphical Boot Logs"
+    default n
+    help
+        Enable this option to display boot logs with graphical output.
+
 endmenu

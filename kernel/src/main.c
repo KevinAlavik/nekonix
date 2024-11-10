@@ -35,26 +35,30 @@ int flanterm_putchar(char c)
 
 void sys_entry(void)
 {
+    _stdout_port = 0xE9;
+    putchar_impl = serial_putchar;
     if (!LIMINE_BASE_REVISION_SUPPORTED)
     {
-        outstr(0xE9, "ERROR: Limine Base Revision is not supported.\n");
+        ERROR("boot", "Limine Base Revision is not supported.");
         hcf();
     }
 
     if (init_serial(0x3F8) != 0)
     {
-        outstr(0xE9, "ERROR: Failed to initialize COM1, looking for alternative outputs.\n");
+        ERROR("boot", "Failed to initialize COM1, looking for alternative outputs.");
         u16 new_port = serial_get_new();
         _stdout_port = new_port;
-        printf("INFO: Selected 0x%.2X as new stdout port.\n", _stdout_port);
+        INFO("boot", "Selected 0x%.2X as new stdout port.", _stdout_port);
     }
-
-    putchar_impl = serial_putchar;
+    else
+    {
+        _stdout_port = 0x3F8;
+    }
 
     bool no_fb = false;
     if (!framebuffer_request.response)
     {
-        printf("WARNING: Failed to get framebuffer.\n");
+        WARN("boot", "Failed to get framebuffer.");
         no_fb = true;
     }
 
@@ -62,7 +66,7 @@ void sys_entry(void)
 
     if (!framebuffer)
     {
-        printf("WARNING: No framebuffers availible.\n");
+        WARN("boot", "No framebuffers availible.");
         no_fb = true;
     };
 
@@ -86,7 +90,7 @@ void sys_entry(void)
 
         if (!ft_ctx)
         {
-            printf("WARNING: Failed to initialize flanterm.\n");
+            WARN("boot", "Failed to initialize Flanterm.");
         }
         else
         {
@@ -94,13 +98,17 @@ void sys_entry(void)
             ft_ctx->full_refresh(ft_ctx);
 
             putchar_impl = flanterm_putchar;
-            printf("Logging enabled on serial port 0x%.2X\n", _stdout_port);
+            if (!_GRAPHICAL_LOG)
+            {
+                WARN("boot", "Graphical text output is disabled, refer to the kernel config. (%d)", _GRAPHICAL_LOG);
+                INFO("boot", "Logging is enabled on serial port: 0x%.2X", _stdout_port);
+            }
         }
     }
 
     // TODO: Make a proper stream instead of manualy changing putchar impl
-    putchar_impl = serial_putchar;
-    printf("NNix (Nikonix) v%s.%s.%s%s (%dx%d)\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_NOTE, framebuffer->width, framebuffer->height);
+    putchar_impl = _GRAPHICAL_LOG ? flanterm_putchar : serial_putchar;
+    INFO("testing", "NNix (Nikonix) v%s.%s.%s%s (%dx%d)", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_NOTE, framebuffer->width, framebuffer->height);
 
     hlt();
 }

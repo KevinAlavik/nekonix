@@ -37,5 +37,34 @@ int init_serial(u16 port)
 
 u16 serial_get_new()
 {
+    /*
+        COM1 	0x3F8 (note: should already been tested prior to this)
+        COM2 	0x2F8
+        COM3 	0x3E8
+        COM4 	0x2E8
+        COM5 	0x5F8
+        COM6 	0x4F8
+        COM7 	0x5E8
+        COM8 	0x4E8
+    */
+
+    u16 com_ports[] = {
+        0x3f8,
+        0x2f8,
+        0x3e8,
+        0x2e8,
+        0x5f8,
+        0x4f8,
+        0x5e8,
+        0x4e8};
+
+    for (u32 i = 0; i < sizeof(com_ports) / sizeof(com_ports[0]); i++)
+    {
+        if (init_serial(com_ports[i]) != 1)
+        {
+            return com_ports[i];
+        }
+    }
+
     return 0xE9;
 }
