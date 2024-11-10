@@ -1,4 +1,5 @@
 #include <dev/serial_util.h>
+#include <boot/nnix.h>
 
 void outstr(u16 port, const char *str)
 {

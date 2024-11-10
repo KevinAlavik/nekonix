@@ -1,4 +1,4 @@
-menu "NNix Kernel Config"
+mainmenu "Nekonix (NNix)/x86_64 0.0.0-unkown Kernel Configuration "
 
 choice
     prompt "Build Type"
@@ -23,4 +23,3 @@ config GRAPHICAL_BOOT_LOGS
     help
         Enable this option to display boot logs with graphical output.
 
-endmenu

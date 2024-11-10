@@ -43,17 +43,7 @@ void sys_entry(void)
         hcf();
     }
 
-    if (init_serial(0x3F8) != 0)
-    {
-        ERROR("boot", "Failed to initialize COM1, looking for alternative outputs.");
-        u16 new_port = serial_get_new();
-        _stdout_port = new_port;
-        INFO("boot", "Selected 0x%.2X as new stdout port.", _stdout_port);
-    }
-    else
-    {
-        _stdout_port = 0x3F8;
-    }
+    _stdout_port = serial_get_new();
 
     bool no_fb = false;
     if (!framebuffer_request.response)

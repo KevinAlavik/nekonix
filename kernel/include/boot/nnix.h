@@ -27,7 +27,11 @@
     printf("nnix@%s: %-5s: " fmt "\n", scope, level, ##__VA_ARGS__);
 
 #define INFO(scope, fmt, ...) _LOG(scope, "INFO", fmt, ##__VA_ARGS__)
+#ifdef _DEBUG
 #define DEBUG(scope, fmt, ...) _LOG(scope, "DEBUG", fmt, ##__VA_ARGS__)
+#else
+#define DEBUG(scope, fmt, ...) (void)0
+#endif // _DEBUG
 #define NOTE(scope, fmt, ...) _LOG(scope, "NOTE", fmt, ##__VA_ARGS__)
 #define WARN(scope, fmt, ...) _LOG(scope, "WARN", fmt, ##__VA_ARGS__)
 #define ERROR(scope, fmt, ...) _LOG(scope, "ERROR", fmt, ##__VA_ARGS__)
