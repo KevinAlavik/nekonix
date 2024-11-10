@@ -19,6 +19,7 @@ run: $(IMAGE_NAME).iso
 		-M q35 \
 		-cdrom $(IMAGE_NAME).iso \
 		-boot d \
+		-debugcon stdio \
 		$(QEMUFLAGS)
 
 .PHONY: run-uefi
@@ -28,6 +29,7 @@ run-uefi: ovmf/ovmf-code-x86_64.fd $(IMAGE_NAME).iso
 		-drive if=pflash,unit=0,format=raw,file=ovmf/ovmf-code-x86_64.fd,readonly=on \
 		-cdrom $(IMAGE_NAME).iso \
 		-boot d \
+		-debugcon stdio \
 		$(QEMUFLAGS)
 
 .PHONY: run-hdd
@@ -35,6 +37,7 @@ run-hdd: $(IMAGE_NAME).hdd
 	qemu-system-x86_64 \
 		-M q35 \
 		-hda $(IMAGE_NAME).hdd \
+		-debugcon stdio \
 		$(QEMUFLAGS)
 
 .PHONY: run-hdd-uefi
@@ -43,6 +46,7 @@ run-hdd-uefi: ovmf/ovmf-code-x86_64.fd $(IMAGE_NAME).hdd
 		-M q35 \
 		-drive if=pflash,unit=0,format=raw,file=ovmf/ovmf-code-x86_64.fd,readonly=on \
 		-hda $(IMAGE_NAME).hdd \
+		-debugcon stdio \
 		$(QEMUFLAGS)
 
 ovmf/ovmf-code-x86_64.fd:

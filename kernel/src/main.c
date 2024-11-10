@@ -12,8 +12,16 @@ void sys_entry(void)
 {
     if (!LIMINE_BASE_REVISION_SUPPORTED)
     {
-        outstr(0xE9, "ERROR: Limine Base Revision is not supported.");
+        outstr(0xE9, "ERROR: Limine Base Revision is not supported.\n");
         hcf();
+    }
+
+    if (init_serial(0x3F8) != 0)
+    {
+        outstr(0xE9, "ERROR: Failed to initialize COM1, looking for alternative outputs.\n");
+        u16 new_port = serial_get_new();
+        _stdout_port = new_port;
+        printf("INFO: Selected 0x%.2X as new stdout port.\n", _stdout_port);
     }
 
     // TODO: Properly setup COMX devices.

@@ -18,11 +18,12 @@ typedef long ssize_t;
 // TODO: Implement proper FILE streams.
 
 void *stdout = NULL;
+u16 _stdout_port = 0x3F8;
 spinlock_t stdout_lock;
 
 int putchar(int c)
 {
-    outb(0x3F8, c);
+    outb(_stdout_port, c);
     return c;
 }
 
@@ -62,7 +63,7 @@ int vfprintf(void *stream, const char *fmt, va_list args)
 
     if (length >= 0 && length < (int)sizeof(buffer))
     {
-        outstr(0x3F8, buffer);
+        outstr(_stdout_port, buffer);
     }
 
     return length;

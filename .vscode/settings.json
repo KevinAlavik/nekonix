@@ -4,6 +4,7 @@
         "cstdint": "cpp",
         "nanoprintf.h": "c",
         "stdio.h": "c",
-        "cpu.h": "c"
+        "cpu.h": "c",
+        "random": "c"
     }
 }
