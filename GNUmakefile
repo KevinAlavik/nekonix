@@ -22,6 +22,7 @@ run: $(IMAGE_NAME).iso
 		-debugcon stdio \
 		$(QEMUFLAGS)
 
+
 .PHONY: run-uefi
 run-uefi: ovmf/ovmf-code-x86_64.fd $(IMAGE_NAME).iso
 	qemu-system-x86_64 \
