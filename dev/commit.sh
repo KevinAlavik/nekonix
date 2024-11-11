@@ -23,5 +23,6 @@ mv Nekonix.iso "${commit_dir}/Nekonix-${commit_hash}.iso"
 scp -r "$commit_dir" root@192.168.100.119:/srv/ftp/public/nekonix/dist/
 
 rm -rf "$commit_dir"
+rm -rf dist
 
 echo "Uploaded ${commit_dir} as Nekonix-${commit_hash}.iso"
