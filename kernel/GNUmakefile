@@ -81,7 +81,7 @@ CONFIG_FLAGS :=
 VERSION_MAJOR   := 0
 VERSION_MINOR   := 1
 VERSION_PATCH   := 1
-VERSION_NOTE    := -$(shell git -C .. rev-parse --short HEAD)
+VERSION_NOTE    := -$(shell git rev-parse --short HEAD)
 
 ifeq ($(CONFIG_BUILD_DEBUG),y)
 	CONFIG_FLAGS += \
