@@ -14,6 +14,13 @@ commit_dir="dist/${commit_hash}"
 mkdir -p "$commit_dir"
 
 echo "$1" > "${commit_dir}/DESCRIPTION"
+
+clone_dir="${commit_dir}/local"
+git clone --depth 1 --branch "$(git rev-parse --abbrev-ref HEAD)" "$(git config --get remote.origin.url)" "$clone_dir"
+cd "$clone_dir"
+git checkout "$commit_hash"
+cd -
+
 git format-patch -1 HEAD --stdout > "${commit_dir}/commit.patch"
 
 make
