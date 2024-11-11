@@ -23,6 +23,7 @@ cd -
 
 git format-patch -1 HEAD --stdout > "${commit_dir}/commit.patch"
 
+make clean
 make
 
 mv Nekonix.iso "${commit_dir}/Nekonix-${commit_hash}.iso"
