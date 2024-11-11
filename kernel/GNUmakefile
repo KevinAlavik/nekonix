@@ -103,6 +103,15 @@ else
         -D_GRAPHICAL_LOG=0
 endif
 
+ifeq ($(CONFIG_MIRROR_BOOT_LOGS),y)
+    CONFIG_FLAGS += \
+        -D_MIRROR_LOG=1
+else
+    CONFIG_FLAGS += \
+        -D_MIRROR_LOG=0
+endif
+
+
 
 VERSION_NOTE := $(shell echo $(VERSION_NOTE) | tr -d '[:space:]')
 CONFIG_FLAGS += -DVERSION_MAJOR=\"$(VERSION_MAJOR)\" -DVERSION_MINOR=\"$(VERSION_MINOR)\" -DVERSION_PATCH=\"$(VERSION_PATCH)\" -DVERSION_NOTE=\"$(VERSION_NOTE)\"

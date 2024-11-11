@@ -33,6 +33,13 @@ int flanterm_putchar(char c)
     return c;
 }
 
+int mirror_putchar(char c)
+{
+    serial_putchar(c);
+    flanterm_putchar(c);
+    return c;
+}
+
 void sys_entry(void)
 {
     _stdout_port = 0xE9;
@@ -93,11 +100,18 @@ void sys_entry(void)
                 WARN("boot", "Graphical text output is disabled, refer to the kernel config. (%d)", _GRAPHICAL_LOG);
                 INFO("boot", "Logging is enabled on serial port: 0x%.2X", _stdout_port);
             }
+            else
+            {
+                if (_MIRROR_LOG)
+                {
+                    INFO("boot", "Logging is enabled on both framebuffer and on serial port: 0x%.2X", _stdout_port);
+                }
+            }
         }
     }
 
     // TODO: Make a proper stream instead of manualy changing putchar impl
-    putchar_impl = _GRAPHICAL_LOG ? flanterm_putchar : serial_putchar;
+    putchar_impl = _MIRROR_LOG ? mirror_putchar : (_GRAPHICAL_LOG ? flanterm_putchar : serial_putchar);
     INFO("testing", "NNix (Nikonix) v%s.%s.%s%s (%dx%d)", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_NOTE, framebuffer->width, framebuffer->height);
 
     hlt();

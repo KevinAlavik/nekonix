@@ -1,4 +1,4 @@
-mainmenu "Nekonix (NNix)/x86_64 0.0.0-unkown Kernel Configuration "
+mainmenu "Nekonix (NNix)/x86_64 0.0.0-unknown Kernel Configuration"
 
 choice
     prompt "Build Type"
@@ -19,7 +19,13 @@ endchoice
 
 config GRAPHICAL_BOOT_LOGS
     bool "Graphical Boot Logs"
-    default n
+    default y
     help
         Enable this option to display boot logs with graphical output.
 
+config MIRROR_BOOT_LOGS
+    bool "Mirror Boot Logs"
+    default n
+    depends on GRAPHICAL_BOOT_LOGS
+    help
+        Enable this option to mirror boot logs to the framebuffer as well as serial.
