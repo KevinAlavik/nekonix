@@ -6,6 +6,9 @@
         "stdio.h": "c",
         "cpu.h": "c",
         "random": "c",
-        "stdarg.h": "c"
+        "stdarg.h": "c",
+        "*.tcc": "c",
+        "gdt.h": "c",
+        "types.h": "c"
     }
 }

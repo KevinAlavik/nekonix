@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef int8_t i8;
 typedef uint8_t u8;
@@ -14,6 +15,7 @@ typedef int64_t i64;
 typedef uint64_t u64;
 
 typedef size_t usize;
+typedef uintptr_t uptr;
 
 typedef struct spinlock
 {

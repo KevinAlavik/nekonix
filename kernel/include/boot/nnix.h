@@ -28,7 +28,7 @@
 #endif // MIRROR_LOG
 
 #define _LOG(scope, level, fmt, ...) \
-    printf("nnix@%s: \t%s: " fmt "\n", scope, level, ##__VA_ARGS__);
+    printf("nnix@%s:\t[%s]\t -> " fmt "\n", scope, level, ##__VA_ARGS__);
 
 #define INFO(scope, fmt, ...) _LOG(scope, "INFO", fmt, ##__VA_ARGS__)
 #ifdef _DEBUG

@@ -6,6 +6,8 @@
 #include <stdbool.h>
 #include <flanterm/flanterm.h>
 #include <flanterm/backends/fb.h>
+#include <core/gdt.h>
+#include <core/idt.h>
 
 __attribute__((used, section(".limine_requests"))) static volatile LIMINE_BASE_REVISION(3);
 __attribute__((used, section(".limine_requests_start"))) static volatile LIMINE_REQUESTS_START_MARKER;
@@ -113,6 +115,22 @@ void sys_entry(void)
     // TODO: Make a proper stream instead of manualy changing putchar impl
     putchar_impl = _MIRROR_LOG ? mirror_putchar : (_GRAPHICAL_LOG ? flanterm_putchar : serial_putchar);
     INFO("testing", "NNix (Nikonix) v%s.%s.%s%s (%dx%d)", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_NOTE, framebuffer->width, framebuffer->height);
+
+    if (gdt_init() != 0)
+    {
+        ERROR("boot", "Failed to initialize GDT, halting system.");
+        hcf();
+    }
+
+    INFO("boot", "Initialized GDT (zero errors reported)");
+
+    if (idt_init() != 0)
+    {
+        ERROR("boot", "Failed to initialize IDT, halting system.");
+        hcf();
+    }
+
+    INFO("boot", "Initialized IDT (zero errors reported)");
 
     hlt();
 }
