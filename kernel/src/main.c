@@ -114,7 +114,7 @@ void sys_entry(void)
 
     // TODO: Make a proper stream instead of manualy changing putchar impl
     putchar_impl = _MIRROR_LOG ? mirror_putchar : (_GRAPHICAL_LOG ? flanterm_putchar : serial_putchar);
-    INFO("testing", "NNix (Nikonix) v%s.%s.%s%s (%dx%d)", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_NOTE, framebuffer->width, framebuffer->height);
+    INFO("testing", "Nnix. (Nikonix) v%s.%s.%s%s (%dx%d)", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_NOTE, framebuffer->width, framebuffer->height);
 
     if (gdt_init() != 0)
     {

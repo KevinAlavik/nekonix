@@ -1,4 +1,4 @@
-mainmenu "Nekonix (NNix)/x86_64 0.0.0-unknown Kernel Configuration"
+mainmenu "Nekonix (Nnix.)/x86_64 0.0.0-unknown Kernel Configuration"
 
 choice
     prompt "Build Type"
