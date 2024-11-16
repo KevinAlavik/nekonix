@@ -28,16 +28,16 @@
 #endif // MIRROR_LOG
 
 #define _LOG(scope, level, fmt, ...) \
-    printf("nnix@%s:\t[%s]\t -> " fmt "\n", scope, level, ##__VA_ARGS__);
+    printf("nnix@%s/%s: " fmt "\n", scope, level, ##__VA_ARGS__);
 
-#define INFO(scope, fmt, ...) _LOG(scope, "INFO", fmt, ##__VA_ARGS__)
+#define INFO(scope, fmt, ...) _LOG(scope, "info", fmt, ##__VA_ARGS__)
 #ifdef _DEBUG
-#define DEBUG(scope, fmt, ...) _LOG(scope, "DEBUG", fmt, ##__VA_ARGS__)
+#define DEBUG(scope, fmt, ...) _LOG(scope, "debug", fmt, ##__VA_ARGS__)
 #else
 #define DEBUG(scope, fmt, ...) (void)0
 #endif // _DEBUG
-#define NOTE(scope, fmt, ...) _LOG(scope, "NOTE", fmt, ##__VA_ARGS__)
-#define WARN(scope, fmt, ...) _LOG(scope, "WARN", fmt, ##__VA_ARGS__)
-#define ERROR(scope, fmt, ...) _LOG(scope, "ERROR", fmt, ##__VA_ARGS__)
+#define NOTE(scope, fmt, ...) _LOG(scope, "note", fmt, ##__VA_ARGS__)
+#define WARN(scope, fmt, ...) _LOG(scope, "warn", fmt, ##__VA_ARGS__)
+#define ERROR(scope, fmt, ...) _LOG(scope, "error", fmt, ##__VA_ARGS__)
 
 #endif // NNIX_H

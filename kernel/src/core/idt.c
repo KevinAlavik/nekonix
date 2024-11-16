@@ -31,23 +31,23 @@ static const exception_info_t exception_info[32] = {
     {"Stack Segment Fault", "#SS", true},
     {"General Protection Fault", "#GP", true},
     {"Page Fault", "#PF", true},
-    {"Reserved", "-", false},
+    {"Reserved", "-", true},
     {"x87 FPU Error", "#MF", true},
     {"Alignment Check", "#AC", true},
     {"Machine Check", "#MC", true},
-    {"SIMD Floating-Point Exception", "#XM/#XF", false},
-    {"Virtualization Exception", "#VE", false},
-    {"Control Protection Exception", "#CP", false},
-    {"Reserved", "-", false},
-    {"Reserved", "-", false},
-    {"Reserved", "-", false},
-    {"Reserved", "-", false},
-    {"Reserved", "-", false},
-    {"Reserved", "-", false},
-    {"Hypervisor Injection Exception", "#HV", false},
-    {"VMM Communication Exception", "#VC", false},
+    {"SIMD Floating-Point Exception", "#XM/#XF", true},
+    {"Virtualization Exception", "#VE", true},
+    {"Control Protection Exception", "#CP", true},
+    {"Reserved", "-", true},
+    {"Reserved", "-", true},
+    {"Reserved", "-", true},
+    {"Reserved", "-", true},
+    {"Reserved", "-", true},
+    {"Reserved", "-", true},
+    {"Hypervisor Injection Exception", "#HV", true},
+    {"VMM Communication Exception", "#VC", true},
     {"Security Exception", "#SX", true},
-    {"Reserved", "-", false}};
+    {"Reserved", "-", true}};
 
 void idt_set_gate(idt_entry_t idt[], int num, u64 base, u16 sel, u8 flags)
 {
@@ -89,7 +89,6 @@ void idt_handler(int_frame_t frame)
 {
     if (frame.vector < 32) // Check for exceptions
     {
-        printf("\n");
         DEBUG("interrupt", "Received exception %d (%s): %s", frame.vector, exception_info[frame.vector].mnemonic, exception_info[frame.vector].message);
 
         if (exception_info[frame.vector].fatal)

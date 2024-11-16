@@ -17,7 +17,8 @@ __attribute__((used, section(".limine_requests"))) static volatile struct limine
 };
 __attribute__((used, section(".limine_requests_end"))) static volatile LIMINE_REQUESTS_END_MARKER;
 
-struct flanterm_context *ft_ctx;
+static struct flanterm_context *ft_ctx;
+static bool no_fb = false;
 
 int serial_putchar(char c)
 {
@@ -42,80 +43,64 @@ int mirror_putchar(char c)
     return c;
 }
 
-void sys_entry(void)
+void init_graphics(void)
 {
-    _stdout_port = 0xE9;
-    putchar_impl = serial_putchar;
-    if (!LIMINE_BASE_REVISION_SUPPORTED)
-    {
-        ERROR("boot", "Limine Base Revision is not supported.");
-        hcf();
-    }
-
-    _stdout_port = serial_get_new();
-
-    bool no_fb = false;
     if (!framebuffer_request.response)
     {
         WARN("boot", "Failed to get framebuffer.");
         no_fb = true;
+        return;
     }
 
     struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
-
     if (!framebuffer)
     {
-        WARN("boot", "No framebuffers availible.");
+        WARN("boot", "No framebuffers available.");
         no_fb = true;
-    };
-
-    if (!no_fb)
-    {
-
-        ft_ctx = flanterm_fb_init(
-            NULL,
-            NULL,
-            framebuffer->address, framebuffer->width, framebuffer->height, framebuffer->pitch,
-            framebuffer->red_mask_size, framebuffer->red_mask_shift,
-            framebuffer->green_mask_size, framebuffer->green_mask_shift,
-            framebuffer->blue_mask_size, framebuffer->blue_mask_shift,
-            NULL,
-            NULL, NULL,
-            NULL, NULL,
-            NULL, NULL,
-            NULL, 0, 0, 1,
-            0, 0,
-            0);
-
-        if (!ft_ctx)
-        {
-            WARN("boot", "Failed to initialize Flanterm.");
-        }
-        else
-        {
-            ft_ctx->cursor_enabled = false;
-            ft_ctx->full_refresh(ft_ctx);
-
-            putchar_impl = flanterm_putchar;
-            if (!_GRAPHICAL_LOG)
-            {
-                WARN("boot", "Graphical text output is disabled, refer to the kernel config. (%d)", _GRAPHICAL_LOG);
-                INFO("boot", "Logging is enabled on serial port: 0x%.2X", _stdout_port);
-            }
-            else
-            {
-                if (_MIRROR_LOG)
-                {
-                    INFO("boot", "Logging is enabled on both framebuffer and on serial port: 0x%.2X", _stdout_port);
-                }
-            }
-        }
+        return;
     }
 
-    // TODO: Make a proper stream instead of manualy changing putchar impl
-    putchar_impl = _MIRROR_LOG ? mirror_putchar : (_GRAPHICAL_LOG ? flanterm_putchar : serial_putchar);
-    INFO("testing", "Nekonix (Nnix.) v%s.%s.%s%s (%dx%d)", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_NOTE, framebuffer->width, framebuffer->height);
+    ft_ctx = flanterm_fb_init(
+        NULL, NULL,
+        framebuffer->address, framebuffer->width, framebuffer->height, framebuffer->pitch,
+        framebuffer->red_mask_size, framebuffer->red_mask_shift,
+        framebuffer->green_mask_size, framebuffer->green_mask_shift,
+        framebuffer->blue_mask_size, framebuffer->blue_mask_shift,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 1, 0, 0, 0, 0);
 
+    if (!ft_ctx)
+    {
+        WARN("boot", "Failed to initialize Flanterm.");
+    }
+    else
+    {
+        ft_ctx->cursor_enabled = false;
+        ft_ctx->full_refresh(ft_ctx);
+    }
+}
+
+void init_output(void)
+{
+    if (!no_fb)
+    {
+        putchar_impl = flanterm_putchar;
+        if (!_GRAPHICAL_LOG)
+        {
+            WARN("boot", "Graphical text output is disabled, refer to the kernel config. (%d)", _GRAPHICAL_LOG);
+            INFO("boot", "Logging is enabled on serial port: 0x%.2X", _stdout_port);
+            putchar_impl = serial_putchar;
+        }
+    }
+    else
+    {
+        putchar_impl = serial_putchar;
+    }
+
+    putchar_impl = _MIRROR_LOG ? mirror_putchar : putchar_impl;
+}
+
+void init_interrupts(void)
+{
     if (gdt_init() != 0)
     {
         ERROR("boot", "Failed to initialize GDT, halting system.");
@@ -131,6 +116,27 @@ void sys_entry(void)
     }
 
     INFO("boot", "Initialized IDT (zero errors reported)");
+}
+
+void sys_entry(void)
+{
+    _stdout_port = 0xE9;
+    putchar_impl = serial_putchar;
+
+    if (!LIMINE_BASE_REVISION_SUPPORTED)
+    {
+        ERROR("boot", "Limine Base Revision is not supported.");
+        hcf();
+    }
+
+    _stdout_port = serial_get_new();
+
+    init_graphics();
+    init_output();
+
+    INFO("boot", "Nekonix (Nnix.) v%s.%s.%s%s (%dx%d)", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_NOTE, framebuffer_request.response->framebuffers[0]->width, framebuffer_request.response->framebuffers[0]->height);
+
+    init_interrupts();
 
     hlt();
 }
