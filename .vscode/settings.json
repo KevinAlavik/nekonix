@@ -9,6 +9,9 @@
         "stdarg.h": "c",
         "*.tcc": "c",
         "gdt.h": "c",
-        "types.h": "c"
+        "types.h": "c",
+        "pmm.h": "c",
+        "nnix.h": "c",
+        "limine.h": "c"
     }
 }

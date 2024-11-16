@@ -81,7 +81,7 @@ CONFIG_FLAGS :=
 VERSION_MAJOR   := 0
 VERSION_MINOR   := 1
 VERSION_PATCH   := 1
-VERSION_NOTE    := -$(shell git rev-parse --short HEAD)
+VERSION_NOTE    := -rosepine
 
 ifeq ($(CONFIG_BUILD_DEBUG),y)
 	CONFIG_FLAGS += \
@@ -95,7 +95,7 @@ ifeq ($(CONFIG_BUILD_RELEASE),y)
 	VERSION_NOTE += -release
 endif
 
-ifeq ($(CONFIG_GRAPHICAL_BOOT_LOGS),y)
+ifeq ($(CONFIG_LOGGING_OPTION_GRAPHICAL),y)
     CONFIG_FLAGS += \
         -D_GRAPHICAL_LOG=1
 else
@@ -103,7 +103,7 @@ else
         -D_GRAPHICAL_LOG=0
 endif
 
-ifeq ($(CONFIG_MIRROR_BOOT_LOGS),y)
+ifeq ($(CONFIG_LOGGING_OPTION_MIRROR),y)
     CONFIG_FLAGS += \
         -D_MIRROR_LOG=1
 else
@@ -111,10 +111,29 @@ else
         -D_MIRROR_LOG=0
 endif
 
+ifeq ($(CONFIG_LOGGING_OPTION_ERROR_ONLY),y)
+    CONFIG_FLAGS += \
+        -D_ERROR_LOG=1
+else
+    CONFIG_FLAGS += \
+        -D_ERROR_LOG=0
+endif
 
+ifeq ($(CONFIG_LOGGING_OPTION_NO_LOGGING),y)
+    CONFIG_FLAGS += \
+        -D_NO_LOG=1
+else
+    CONFIG_FLAGS += \
+        -D_NO_LOG=0
+endif
+
+
+CONFIG_PMM_TEST_AMOUNT ?= 10
 
 VERSION_NOTE := $(shell echo $(VERSION_NOTE) | tr -d '[:space:]')
 CONFIG_FLAGS += -DVERSION_MAJOR=\"$(VERSION_MAJOR)\" -DVERSION_MINOR=\"$(VERSION_MINOR)\" -DVERSION_PATCH=\"$(VERSION_PATCH)\" -DVERSION_NOTE=\"$(VERSION_NOTE)\"
+
+CONFIG_FLAGS += -D_PMM_TESTS=$(CONFIG_PMM_TEST_AMOUNT)
 
 .PHONY: all
 all: .config bin/$(OUTPUT)

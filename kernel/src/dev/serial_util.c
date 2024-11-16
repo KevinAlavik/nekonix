@@ -39,7 +39,7 @@ int init_serial(u16 port)
 u16 serial_get_new()
 {
     /*
-        COM1 	0x3F8 (note: should already been tested prior to this)
+        COM1 	0x3F8
         COM2 	0x2F8
         COM3 	0x3E8
         COM4 	0x2E8

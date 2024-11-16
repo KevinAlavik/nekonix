@@ -1,7 +1,8 @@
 mainmenu "Nekonix (Nnix.)/x86_64 0.0.0-unknown Kernel Configuration"
 
+# Build Type Options
 choice
-    prompt "Build Type"
+    prompt "Select Build Type"
     default BUILD_RELEASE
 
 config BUILD_DEBUG
@@ -17,15 +18,54 @@ config BUILD_RELEASE
 
 endchoice
 
-config GRAPHICAL_BOOT_LOGS
-    bool "Graphical Boot Logs"
-    default y
+
+choice
+    prompt "Logging Options"
+    default LOGGING_OPTION_GRAPHICAL
+
+config LOGGING_OPTION_GRAPHICAL
+    bool "Graphical Only"
+    default n
     help
         Enable this option to display boot logs with graphical output.
+        This provides a visually appealing output of kernel boot logs on
+        supported hardware, enhancing user experience.
 
-config MIRROR_BOOT_LOGS
-    bool "Mirror Boot Logs"
+config LOGGING_OPTION_MIRROR
+    bool "Mirrored"
     default n
-    depends on GRAPHICAL_BOOT_LOGS
     help
-        Enable this option to mirror boot logs to the framebuffer as well as serial.
+        Enable this option to mirror boot logs to both the framebuffer 
+        and the serial console. This allows for better log accessibility
+        on different output devices, such as serial terminals and screens.
+
+config LOGGING_OPTION_ERROR_ONLY
+    bool "Error Only, mirrored"
+    default n
+    help
+        Enable this option to allow only error-level logs during boot and
+        runtime. This ensures that the kernel outputs only critical error 
+        information, ignoring less important logs such as warnings or 
+        informational messages.
+
+config LOGGING_OPTION_NO_LOGGING
+    bool "Disable"
+    default n
+    help
+        Enable this option to completely disable logging, including errors. 
+        This is not recommended as it makes debugging issues more difficult. 
+        Use this only for extreme use cases where logging overhead must be
+        minimized entirely.
+
+endchoice
+
+config PMM_TEST_AMOUNT
+    int "Amount of Physical Memory tests"
+    default 10
+    range 1 100000000
+    help
+        Specify the number of PMM (Physical Memory Management) tests to run.
+        This value must be between 1 and 1000. The default is 10.
+
+        Adjust this setting based on the testing requirements and available
+        system resources.
