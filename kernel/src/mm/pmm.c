@@ -66,7 +66,7 @@ void pmm_free_page(void *ptr)
 {
     if (ptr == NULL)
     {
-        WARNING("mm", "Attempt to free a NULL pointer.");
+        DEBUG("mm", "Attempt to free a NULL pointer.");
         return;
     }
 
@@ -77,7 +77,6 @@ void pmm_free_page(void *ptr)
     }
 
     stack.pages[stack.idx++] = (u64)ptr;
-    DEBUG("mm", "Page 0x%.16llx freed.", (u64)ptr);
 }
 
 void pmm_dump()
