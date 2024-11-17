@@ -6,9 +6,8 @@ GENERIC_QEMUFLAGS += -M q35
 GENERIC_QEMUFLAGS += -boot d
 GENERIC_QEMUFLAGS += -debugcon stdio
 
-QEMUFLAGS := $(GENERIC_QEMUFLAGS)
+QEMUFLAGS ?= $(GENERIC_QEMUFLAGS)
 
-override QEMUFLAGS := $(if $(QEMUFLAGS),$(QEMUFLAGS),$(GENERIC_QEMUFLAGS))
 
 override IMAGE_NAME := Nekonix
 
@@ -22,6 +21,7 @@ all-hdd: $(IMAGE_NAME).hdd
 run: $(IMAGE_NAME).iso
 	qemu-system-x86_64 \
 		-cdrom $(IMAGE_NAME).iso \
+		$(GENERIC_QEMUFLAGS) \
 		$(QEMUFLAGS)
 
 .PHONY: run-uefi
@@ -29,12 +29,14 @@ run-uefi: ovmf/ovmf-code-x86_64.fd $(IMAGE_NAME).iso
 	qemu-system-x86_64 \
 		-drive if=pflash,unit=0,format=raw,file=ovmf/ovmf-code-x86_64.fd,readonly=on \
 		-cdrom $(IMAGE_NAME).iso \
+		$(GENERIC_QEMUFLAGS) \
 		$(QEMUFLAGS)
 
 .PHONY: run-hdd
 run-hdd: $(IMAGE_NAME).hdd
 	qemu-system-x86_64 \
 		-hda $(IMAGE_NAME).hdd \
+		$(GENERIC_QEMUFLAGS) \
 		$(QEMUFLAGS)
 
 .PHONY: run-hdd-uefi
@@ -42,6 +44,7 @@ run-hdd-uefi: ovmf/ovmf-code-x86_64.fd $(IMAGE_NAME).hdd
 	qemu-system-x86_64 \
 		-drive if=pflash,unit=0,format=raw,file=ovmf/ovmf-code-x86_64.fd,readonly=on \
 		-hda $(IMAGE_NAME).hdd \
+		$(GENERIC_QEMUFLAGS) \
 		$(QEMUFLAGS)
 
 ovmf/ovmf-code-x86_64.fd:

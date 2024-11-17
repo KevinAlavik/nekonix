@@ -14,9 +14,12 @@ typedef struct pmm_stack
     u64 max;
 } pmm_stack_t;
 
-#define DIV_ROUND_UP(a, b) (((a) + (b) - 1) / (b))
-#define ALIGN_UP(a, b) (((a) + (b) - 1) & ~((b) - 1))
-#define HIGHER_HALF(a) ((u64)a + hhdm_offset)
+#define DIV_ROUND_UP(x, y) (x + (y - 1)) / y
+#define ALIGN_UP(x, y) DIV_ROUND_UP(x, y) * y
+#define ALIGN_DOWN(x, y) (x / y) * y
+
+#define HIGHER_HALF(ptr) ((void *)((u64)ptr) + hhdm_offset)
+#define PHYSICAL(ptr) ((void *)((u64)ptr) - hhdm_offset)
 
 int pmm_init(struct limine_memmap_response *memmap);
 void *pmm_request_page();

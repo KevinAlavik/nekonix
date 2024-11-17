@@ -9,6 +9,7 @@
 #include <core/gdt.h>
 #include <core/idt.h>
 #include <mm/pmm.h>
+#include <lib/string.h>
 
 u64 hhdm_offset;
 
@@ -145,15 +146,17 @@ int test_pmm(int tests)
 {
     for (int i = 1; i < tests + 1; i++)
     {
-        char *a = (char *)pmm_request_page();
+        int *a = (int *)HIGHER_HALF(pmm_request_page());
         if (a == NULL)
         {
             DEBUG("boot", "Failed to allocate a single page for test %d", i);
             return 1;
         }
 
-        DEBUG("test", "(test %d) Allocated 1 page at: 0x%.16llx", i, (u64)a);
-        pmm_free_page(a);
+        //*a = 69;
+
+        DEBUG("test", "(test %d) Allocated 1 page at: %p", i, (u64)a);
+        // pmm_free_page(a);
     }
     return 0;
 }
@@ -162,6 +165,8 @@ void memory_init(void)
 {
     hhdm_offset = hhdm_request.response->offset;
     int error_count = 0;
+
+    DEBUG("boot", "HHDM Offset: 0x%.16llx", hhdm_offset);
 
     if (pmm_init(memmap_request.response) != 0)
     {

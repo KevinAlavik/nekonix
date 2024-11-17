@@ -54,54 +54,30 @@ void *pmm_request_page()
 {
     if (stack.idx == 0)
     {
+        ERROR("mm", "No more pages available.");
         return NULL;
     }
 
     u64 page_addr = stack.pages[--stack.idx];
-    stack.pages[stack.idx] = 0;
     return (void *)page_addr;
 }
 
 void pmm_free_page(void *ptr)
 {
-    if (stack.idx + 1 >= stack.max)
+    if (ptr == NULL)
     {
+        WARNING("mm", "Attempt to free a NULL pointer.");
+        return;
+    }
+
+    if (stack.idx >= stack.max)
+    {
+        ERROR("mm", "Stack overflow attempt while freeing a page.");
         return;
     }
 
     stack.pages[stack.idx++] = (u64)ptr;
-    ptr = NULL;
-}
-
-void *pmm_request_pages(usize pages)
-{
-    if (pages == 0 || stack.idx < pages)
-    {
-        return NULL;
-    }
-
-    u64 page_addr = stack.pages[stack.idx - pages];
-    for (usize i = 0; i < pages; i++)
-    {
-        stack.pages[--stack.idx] = 0;
-    }
-
-    return (void *)page_addr;
-}
-
-void pmm_free_pages(void *ptr, usize pages)
-{
-    if (ptr == NULL || (stack.idx + pages) >= stack.max)
-    {
-        return;
-    }
-
-    u64 page_addr = (u64)ptr;
-    for (usize i = 0; i < pages; i++)
-    {
-        stack.pages[stack.idx++] = page_addr;
-        page_addr += PAGE_SIZE;
-    }
+    DEBUG("mm", "Page 0x%.16llx freed.", (u64)ptr);
 }
 
 void pmm_dump()
