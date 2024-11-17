@@ -153,10 +153,10 @@ int test_pmm(int tests)
             return 1;
         }
 
-        //*a = 69;
+        *a = 69;
 
         DEBUG("test", "(test %d) Allocated 1 page at: %p", i, (u64)a);
-        // pmm_free_page(a);
+        pmm_free_page(a);
     }
     return 0;
 }
