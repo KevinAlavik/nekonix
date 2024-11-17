@@ -10,6 +10,7 @@
 #include <core/idt.h>
 #include <mm/pmm.h>
 #include <lib/string.h>
+#include <mm/vmm.h>
 
 u64 hhdm_offset;
 
@@ -170,26 +171,40 @@ int test_pmm(int tests)
 void memory_init(void)
 {
     hhdm_offset = hhdm_request.response->offset;
-    int error_count = 0;
+    int pmm_error_count = 0;
 
     DEBUG("boot", "HHDM Offset: 0x%.16llx", hhdm_offset);
 
     if (pmm_init(memmap_request.response) != 0)
     {
         ERROR("boot", "Failed to initialize PMM (Physical Memory Manager), unkown error");
-        error_count++;
+        pmm_error_count++;
     }
 
     if (test_pmm(_PMM_TESTS) != 0)
     {
         ERROR("boot", "An error occurred during testing of PMM (Physical Memory Manager), unkown error");
-        error_count++;
+        pmm_error_count++;
     }
 
-    INFO("boot", "Initialized PMM (%d errors reported), %d tests ran", error_count, _PMM_TESTS);
-    if (error_count > 0)
+    INFO("boot", "Initialized PMM (%d errors reported), %d tests ran", pmm_error_count, _PMM_TESTS);
+    if (pmm_error_count > 0)
     {
         ERROR("boot", "Error(s) happened during initialization or testing for the PMM (Physical Memory Manager), this will result in a system halt. Bye!");
+        hcf();
+    }
+
+    int vmm_error_count = 0;
+    if (vmm_init() != 0)
+    {
+        ERROR("boot", "Failed to initialize VMM (Virtual Memory Manager), unkown error");
+        vmm_error_count++;
+    }
+
+    INFO("boot", "Initialized VMM (%d errors reported)", vmm_error_count);
+    if (vmm_error_count > 0)
+    {
+        ERROR("boot", "Error(s) happened during initialization or testing for the VMM (Virtual Memory Manager), this will result in a system halt. Bye!");
         hcf();
     }
 }
