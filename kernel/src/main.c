@@ -153,9 +153,15 @@ int test_pmm(int tests)
             return 1;
         }
 
-        //*a = 69;
+        *a = 69;
+        if (*a != 69 || a == NULL)
+        {
+            DEBUG("test", "test %d failed to write to 1 page at: %p", i, (u64)a);
+            pmm_free_page(PHYSICAL(a));
+            return 1;
+        }
 
-        DEBUG("test", "(test %d) Allocated 1 page at: %p", i, (u64)a);
+        DEBUG("test", "test %d successfully allocated and wrote to 1 page at: %p", i, (u64)a);
         pmm_free_page(PHYSICAL(a));
     }
     return 0;

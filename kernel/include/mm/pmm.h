@@ -24,8 +24,6 @@ typedef struct pmm_stack
 int pmm_init(struct limine_memmap_response *memmap);
 void *pmm_request_page();
 void pmm_free_page(void *ptr);
-void *pmm_request_pages(usize pages);
-void pmm_free_pages(void *ptr, usize pages);
 void pmm_dump();
 
 #endif // PMM_H

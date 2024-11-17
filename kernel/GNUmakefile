@@ -183,7 +183,9 @@ uninstall:
 	rm -f "$(DESTDIR)$(PREFIX)/share/$(OUTPUT)/$(OUTPUT)"
 	-rmdir "$(DESTDIR)$(PREFIX)/share/$(OUTPUT)"
 
+KCONFIG ?= kconfig-mconf
+
 .PHONY: menuconfig
 menuconfig: Kconfig
-	@kconfig-mconf Kconfig
+	@$(KCONFIG) Kconfig
 	@$(MAKE) clean

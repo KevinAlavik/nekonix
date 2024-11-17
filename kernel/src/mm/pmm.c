@@ -36,9 +36,12 @@ int pmm_init(struct limine_memmap_response *memmap)
     for (u64 i = 0; i < memmap->entry_count; i++)
     {
         struct limine_memmap_entry *entry = memmap->entries[i];
-        for (u64 j = 0; j < entry->length; j += PAGE_SIZE)
+        if (entry->type == LIMINE_MEMMAP_USABLE)
         {
-            stack.pages[stack.idx++] = entry->base + j;
+            for (u64 j = 0; j < entry->length; j += PAGE_SIZE)
+            {
+                stack.pages[stack.idx++] = entry->base + j;
+            }
         }
     }
 
@@ -96,6 +99,8 @@ void pmm_dump()
         {
             INFO("mm", "   * Page %llu: 0x%.16llx", i, stack.pages[i]);
         }
+
+        INFO("mm", " - Total free pages: %llu", stack.idx);
     }
 
     INFO("mm", " - High memory address: 0x%.16llx", stack.pages[(stack.idx ? stack.idx : 1) - 1]);

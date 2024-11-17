@@ -6,8 +6,7 @@ GENERIC_QEMUFLAGS += -M q35
 GENERIC_QEMUFLAGS += -boot d
 GENERIC_QEMUFLAGS += -debugcon stdio
 
-QEMUFLAGS ?= $(GENERIC_QEMUFLAGS)
-
+QEMUFLAGS ?= 
 
 override IMAGE_NAME := Nekonix
 
