@@ -1,6 +1,6 @@
 # Nekonix (Nnix.)
 
-> ![NOTE]
+> [!NOTE]
 > Nekonix (Nnix.) is a hobby project and not meant to run in production environments.
 
 <img src="https://github.com/KevinAlavik/nekonix/blob/main/assets/nnix-dark.png?raw=true" width="150">
