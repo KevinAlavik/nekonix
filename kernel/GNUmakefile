@@ -78,10 +78,10 @@ override HEADER_DEPS := $(addprefix obj/,$(CFILES:.c=.c.d) $(ASFILES:.S=.S.d))
 -include .config 
 CONFIG_FLAGS :=
 
-VERSION_MAJOR   := 0
+VERSION_MAJOR   := 1
 VERSION_MINOR   := 1
-VERSION_PATCH   := 1
-VERSION_NOTE    := -rosepine
+VERSION_PATCH   := 2
+VERSION_NOTE    := -rosepine-alpha
 
 ifeq ($(CONFIG_BUILD_DEBUG),y)
 	CONFIG_FLAGS += \
@@ -92,7 +92,6 @@ endif
 ifeq ($(CONFIG_BUILD_RELEASE),y)
 	CONFIG_FLAGS += \
 		-D_RELEASE
-	VERSION_NOTE += -release
 endif
 
 ifeq ($(CONFIG_LOGGING_OPTION_GRAPHICAL),y)

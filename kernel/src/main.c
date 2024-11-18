@@ -225,6 +225,15 @@ void memory_init(void)
     }
 }
 
+char *_text[] = {
+    " _   _       _        ",
+    "| \\ | |_ __ (_)_  __  ",
+    "|  \\| | '_ \\| \\ \\/ /  ",
+    "| |\\  | | | | |>  < _ ",
+    "|_| \\_|_| |_|_/_/\\_(_)",
+    "                      ",
+    NULL};
+
 void sys_entry(void)
 {
     _stdout_port = 0xE9;
@@ -247,7 +256,12 @@ void sys_entry(void)
     memory_init();
 
     printf("\n");
-    printf("Nnix. v%s.%s.%s%s\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_NOTE);
+    for (int i = 0; _text[i] != NULL; i++)
+    {
+        printf("%s\n", _text[i]);
+    }
+
+    printf("(Nekonix v%s.%s.%s%s)\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_NOTE);
 
     hlt();
 }
