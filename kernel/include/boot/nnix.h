@@ -66,4 +66,16 @@
 
 extern u64 hhdm_offset;
 
+extern char __limine_requests_start[];
+extern char __limine_requests_end[];
+extern char __text_start[];
+extern char __text_end[];
+extern char __rodata_start[];
+extern char __rodata_end[];
+extern char __data_start[];
+extern char __data_end[];
+
+extern u64 __kernel_phys_base;
+extern u64 __kernel_virt_base;
+
 #endif // NNIX_H

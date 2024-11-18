@@ -7,3 +7,4 @@ limine.h
 nanoprintf.h
 .config*
 kernel/src/flanterm/
+com1.txt

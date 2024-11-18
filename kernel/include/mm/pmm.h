@@ -14,9 +14,9 @@ typedef struct pmm_stack
     u64 max;
 } pmm_stack_t;
 
-#define DIV_ROUND_UP(x, y) (x + (y - 1)) / y
-#define ALIGN_UP(x, y) DIV_ROUND_UP(x, y) * y
-#define ALIGN_DOWN(x, y) (x / y) * y
+#define DIV_ROUND_UP(x, y) (((u64)(x) + ((u64)(y) - 1)) / (u64)(y))
+#define ALIGN_UP(x, y) (DIV_ROUND_UP(x, y) * (u64)(y))
+#define ALIGN_DOWN(x, y) (((u64)(x) / (u64)(y)) * (u64)(y))
 
 #define HIGHER_HALF(ptr) ((void *)((u64)ptr) + hhdm_offset)
 #define PHYSICAL(ptr) ((void *)((u64)ptr) - hhdm_offset)

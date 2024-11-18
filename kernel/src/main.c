@@ -13,6 +13,8 @@
 #include <mm/vmm.h>
 
 u64 hhdm_offset;
+u64 __kernel_phys_base;
+u64 __kernel_virt_base;
 
 __attribute__((used, section(".limine_requests"))) static volatile LIMINE_BASE_REVISION(3);
 __attribute__((used, section(".limine_requests_start"))) static volatile LIMINE_REQUESTS_START_MARKER;
@@ -26,6 +28,10 @@ __attribute__((used, section(".limine_requests"))) static volatile struct limine
 };
 __attribute__((used, section(".limine_requests"))) static volatile struct limine_hhdm_request hhdm_request = {
     .id = LIMINE_HHDM_REQUEST,
+    .response = 0,
+};
+__attribute__((used, section(".limine_requests"))) static volatile struct limine_kernel_address_request kernel_address_request = {
+    .id = LIMINE_KERNEL_ADDRESS_REQUEST,
     .response = 0,
 };
 __attribute__((used, section(".limine_requests_end"))) static volatile LIMINE_REQUESTS_END_MARKER;
@@ -195,6 +201,10 @@ void memory_init(void)
     }
 
     int vmm_error_count = 0;
+
+    __kernel_phys_base = kernel_address_request.response->physical_base;
+    __kernel_virt_base = kernel_address_request.response->virtual_base;
+
     if (vmm_init() != 0)
     {
         ERROR("boot", "Failed to initialize VMM (Virtual Memory Manager), unkown error");
