@@ -103,7 +103,7 @@ void output_init(void)
     if (!no_fb)
     {
         putchar_impl = flanterm_putchar;
-        if (!_GRAPHICAL_LOG)
+        if (!_GRAPHICAL_LOG && !_MIRROR_LOG)
         {
             WARN("boot", "Graphical text output is disabled, refer to the kernel config. (%d)", _GRAPHICAL_LOG);
             INFO("boot", "Logging is enabled on serial port: 0x%.2X", _stdout_port);
@@ -174,6 +174,12 @@ int test_pmm(int tests)
     return 0;
 }
 
+int test_vmm(int tests)
+{
+    (void)tests;
+    return 0;
+}
+
 void memory_init(void)
 {
     hhdm_offset = hhdm_request.response->offset;
@@ -211,7 +217,7 @@ void memory_init(void)
         vmm_error_count++;
     }
 
-    INFO("boot", "Initialized VMM (%d errors reported)", vmm_error_count);
+    INFO("boot", "Initialized VMM (%d errors reported), 0 tests ran", vmm_error_count);
     if (vmm_error_count > 0)
     {
         ERROR("boot", "Error(s) happened during initialization or testing for the VMM (Virtual Memory Manager), this will result in a system halt. Bye!");
@@ -242,7 +248,6 @@ void sys_entry(void)
 
     printf("\n");
     printf("Nnix. v%s.%s.%s%s\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_NOTE);
-    pmm_dump();
 
     hlt();
 }
