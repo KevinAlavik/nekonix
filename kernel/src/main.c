@@ -260,6 +260,12 @@ void memory_init(void)
     }
 }
 
+void filesystem_init()
+{
+    // TODO: Implement and initialize VFS and mount necessary filesystems. For now only:
+    // - initrd
+}
+
 char *_text[] = {
     " _   _       _        ",
     "| \\ | |_ __ (_)_  __  ",
@@ -289,6 +295,8 @@ void sys_entry(void)
 
     interrupts_init();
     memory_init();
+
+    filesystem_init();
 
     printf("\n");
     for (int i = 0; _text[i] != NULL; i++)
