@@ -150,7 +150,7 @@ void vma_free(vma_context_t *ctx, void *ptr)
     vma_region_t *prev = region->prev;
     vma_region_t *next = region->next;
 
-    for (u64 i = 0; i < ALIGN_UP(region->size, PAGE_SIZE) / PAGE_SIZE; i++)
+    for (u64 i = 0; i < region->size; i++)
     {
         pmm_free_page((void *)(virt_to_phys(ctx->pagemap, region->start + (i * PAGE_SIZE))));
         vmm_unmap(ctx->pagemap, region->start + (i * PAGE_SIZE));
@@ -172,6 +172,5 @@ void vma_free(vma_context_t *ctx, void *ptr)
     }
 
     pmm_free_page((void *)PHYSICAL(region));
-    pmm_free_page((void *)PHYSICAL(ptr));
     return;
 }

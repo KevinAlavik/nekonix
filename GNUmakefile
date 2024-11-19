@@ -23,6 +23,15 @@ run: $(IMAGE_NAME).iso
 		$(GENERIC_QEMUFLAGS) \
 		$(QEMUFLAGS)
 
+.PHONY: debug
+debug: $(IMAGE_NAME).iso
+	qemu-system-x86_64 \
+		-cdrom $(IMAGE_NAME).iso \
+		-S -d int \
+		$(GENERIC_QEMUFLAGS) \
+		$(QEMUFLAGS)
+
+
 .PHONY: run-uefi
 run-uefi: ovmf/ovmf-code-x86_64.fd $(IMAGE_NAME).iso
 	qemu-system-x86_64 \

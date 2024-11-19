@@ -1,10 +1,13 @@
 #include <core/idt.h>
 #include <boot/nnix.h>
 #include <core/cpu.h>
+#include <mm/pmm.h>
 
 idt_entry_t idt_entries[IDT_ENTRY_COUNT];
 idt_pointer_t idt_pointer;
 extern u64 isr_table[];
+
+bool _panicked;
 
 idt_handler_t irq_handlers[IRQ_COUNT] = {0};
 
@@ -81,8 +84,44 @@ int idt_init()
     }
 
     idt_load((u64)&idt_pointer);
+    _panicked = false;
     DEBUG("interrupt", "IDT loaded with base=0x%lx, limit=%u", idt_pointer.base, idt_pointer.limit);
     return 0;
+}
+
+// TODO: Move
+typedef struct stack_frame
+{
+    struct stack_frame *rbp;
+    uint64_t rip;
+} stack_frame_t;
+
+void _backtrace(uint64_t caller)
+{
+    stack_frame_t *frame;
+    asm volatile("mov %%rbp, %0" : "=r"(frame));
+
+    ERROR("interrupt", "--- BACKTRACE START ----");
+
+    if (frame && frame->rbp == NULL)
+    {
+        ERROR("interrupt", "No stack trace available-");
+        return;
+    }
+
+    if (caller != 0)
+    {
+        ERROR("interrupt", " - [caller] %-24s @ %.16llx", "<unkown>", caller);
+    }
+
+    int offset = 0;
+    for (int i = 0; frame && frame->rbp != NULL; i++)
+    {
+        ERROR("interrupt", " - [%06d] %-24s @ %.16llx", i - offset, "<unkown>", frame->rip);
+        frame = frame->rbp;
+    }
+
+    ERROR("interrupt", "-----------------------");
 }
 
 void idt_handler(int_frame_t frame)
@@ -93,6 +132,13 @@ void idt_handler(int_frame_t frame)
 
         if (exception_info[frame.vector].fatal)
         {
+            if (_panicked)
+            {
+                ERROR("interrupt", "Recived a faulty exceptions whilst in another panic. Halting system.");
+                hcf();
+            }
+
+            _panicked = true;
             ERROR("interrupt", "--- INTTERUPT INFORMATION ---");
             ERROR("interrupt", " - %s (%s) @ 0x%.16llx on CPU %s", exception_info[frame.vector].mnemonic, exception_info[frame.vector].message, frame.rip, "<unknown>");
             ERROR("interrupt", " - Register Dump:");
@@ -170,7 +216,10 @@ void idt_handler(int_frame_t frame)
                 ERROR("interrupt", " - No detailed information for this exception.");
                 break;
             }
+
             ERROR("interrupt", "-------------------------------");
+            pmm_dump();
+            //_backtrace(frame.rip);
             hcf();
         }
         else

@@ -62,9 +62,20 @@ endchoice
 config PMM_TEST_AMOUNT
     int "Amount of Physical Memory tests"
     default 10
-    range 1 100000000
+    range 1 1000
     help
         Specify the number of PMM (Physical Memory Management) tests to run.
+        This value must be between 1 and 1000. The default is 10.
+
+        Adjust this setting based on the testing requirements and available
+        system resources.
+
+config VMM_TEST_AMOUNT
+    int "Amount of Virtual Memory tests"
+    default 10
+    range 1 1000
+    help
+        Specify the number of VMM (Virtual Memory Management) tests to run.
         This value must be between 1 and 1000. The default is 10.
 
         Adjust this setting based on the testing requirements and available

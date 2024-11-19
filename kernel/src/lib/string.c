@@ -1,4 +1,5 @@
 #include <lib/string.h>
+#include <boot/nnix.h>
 
 void *memcpy(void *dest, const void *src, usize n)
 {
@@ -23,6 +24,7 @@ void *memset(void *s, int c, usize n)
 
 void *memmove(void *dest, const void *src, usize n)
 {
+
     u8 *d = dest;
     const u8 *s = src;
     if (s > d)

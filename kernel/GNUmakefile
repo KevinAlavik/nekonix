@@ -29,8 +29,12 @@ ifeq ($(CC_IS_CLANG),1)
 endif
 
 override CFLAGS += \
+    -g3 \
+    -gdwarf-2 \
+    -O1 \
     -Wall \
     -Wextra \
+    -Werror \
     -std=gnu11 \
     -nostdinc \
     -ffreestanding \
@@ -132,7 +136,7 @@ CONFIG_PMM_TEST_AMOUNT ?= 10
 VERSION_NOTE := $(shell echo $(VERSION_NOTE) | tr -d '[:space:]')
 CONFIG_FLAGS += -DVERSION_MAJOR=\"$(VERSION_MAJOR)\" -DVERSION_MINOR=\"$(VERSION_MINOR)\" -DVERSION_PATCH=\"$(VERSION_PATCH)\" -DVERSION_NOTE=\"$(VERSION_NOTE)\"
 
-CONFIG_FLAGS += -D_PMM_TESTS=$(CONFIG_PMM_TEST_AMOUNT)
+CONFIG_FLAGS += -D_PMM_TESTS=$(CONFIG_PMM_TEST_AMOUNT) -D_VMM_TESTS=$(CONFIG_VMM_TEST_AMOUNT)
 
 .PHONY: all
 all: .config bin/$(OUTPUT)
