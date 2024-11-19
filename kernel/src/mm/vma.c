@@ -8,7 +8,7 @@ vma_context_t *vma_create_context(u64 *pagemap)
     ctx->root = (vma_region_t *)HIGHER_HALF(pmm_request_page());
     memset(ctx->root, 0, sizeof(vma_region_t));
     ctx->pagemap = pagemap;
-    ctx->root->start = 0x1000;
+    ctx->root->start = 0;
     ctx->root->size = 1;
     return ctx;
 }

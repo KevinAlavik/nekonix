@@ -314,7 +314,17 @@ void sys_entry(void)
     }
 
     strcpy(hello, "Hello, Nekonix!");
-    printf("%s\n", hello);
+    printf("0x%.16llx: %s\n", (u64)hello, hello);
+
+    char *bye = (char *)kmalloc(strlen("Goodbye, Nekonix!"));
+    if (bye == NULL)
+    {
+        ERROR("boot", "Failed to allocate memory for 'bye' string, halting system.");
+        hcf();
+    }
+
+    strcpy(bye, "Goodbye, Nekonix!");
+    printf("0x%.16llx: %s\n", (u64)bye, bye);
 
     hlt();
 }
