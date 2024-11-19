@@ -11,6 +11,7 @@
 #include <mm/pmm.h>
 #include <lib/string.h>
 #include <mm/vmm.h>
+#include <mm/vma.h>
 
 u64 hhdm_offset;
 u64 __kernel_phys_base;
@@ -156,27 +157,48 @@ int test_pmm(int tests)
         int *a = (int *)HIGHER_HALF(pmm_request_page());
         if (a == NULL)
         {
-            DEBUG("boot", "Failed to allocate a single page for test %d", i);
+            ERROR("test-pmm", "Failed to allocate a single page for test %d", i);
             return 1;
         }
 
         *a = 69;
         if (*a != 69 || a == NULL)
         {
-            DEBUG("test", "test %d failed to write to 1 page at: %p", i, (u64)a);
+            DEBUG("test-pmm", "test %d failed to write to 1 page at: 0x%.16llx", i, (u64)a);
             pmm_free_page(PHYSICAL(a));
             return 1;
         }
 
-        DEBUG("test", "test %d successfully allocated and wrote to 1 page at: %p", i, (u64)a);
+        DEBUG("test-pmm", "test %d successfully allocated and wrote to 1 page at: 0x%.16llx", i, (u64)a);
         pmm_free_page(PHYSICAL(a));
     }
     return 0;
 }
 
-int test_vmm(int tests)
+int test_vmm(int tests, vma_context_t *ctx)
 {
-    (void)tests;
+    for (int i = 1; i < tests + 1; i++)
+    {
+        int *a = (int *)vma_alloc(ctx, 1, VMM_PRESENT | VMM_WRITABLE);
+        if (a == NULL)
+        {
+            ERROR("test-vmm", "Failed to allocate a single page for test %d", i);
+            vma_destroy_context(ctx);
+            return 1;
+        }
+
+        *a = 69;
+        if (*a != 69)
+        {
+            DEBUG("test-vmm", "test %d failed to write to 1 page at: 0x%.16llx", i, (u64)a);
+            vma_free(ctx, a);
+            vma_destroy_context(ctx);
+            return 1;
+        }
+
+        DEBUG("test-vmm", "test %d successfully allocated and wrote to 1 page at: 0x%.16llx", i, (u64)a);
+        vma_free(ctx, a);
+    }
     return 0;
 }
 
@@ -217,7 +239,16 @@ void memory_init(void)
         vmm_error_count++;
     }
 
-    INFO("boot", "Initialized VMM (%d errors reported), 0 tests ran", vmm_error_count);
+    vma_context_t *ctx = vma_create_context(kernel_pagemap);
+    if (ctx == NULL)
+    {
+        ERROR("boot", "Failed to create a VMA context for the kernel, unkown error");
+        vmm_error_count++;
+    }
+
+    test_vmm(_VMM_TESTS, ctx);
+
+    INFO("boot", "Initialized VMM (%d errors reported), %d tests ran", vmm_error_count, _VMM_TESTS);
     if (vmm_error_count > 0)
     {
         ERROR("boot", "Error(s) happened during initialization or testing for the VMM (Virtual Memory Manager), this will result in a system halt. Bye!");
@@ -262,7 +293,6 @@ void sys_entry(void)
     }
 
     printf("(Nekonix v%s.%s.%s%s)\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_NOTE);
-    pmm_dump();
 
     hlt();
 }

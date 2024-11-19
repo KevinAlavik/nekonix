@@ -40,6 +40,10 @@
 #define _PMM_TESTS 10
 #endif // _PMM_TESTS
 
+#ifndef _VMM_TESTS
+#define _VMM_TESTS 10
+#endif // _VMM_TESTS
+
 #if _NO_LOG
 #define _LOG(scope, level, fmt, ...) (void)0
 #else

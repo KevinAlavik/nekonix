@@ -3,6 +3,8 @@
 #include <lib/types.h>
 #include <lib/string.h>
 
+u64 *kernel_pagemap;
+
 u64 virt_to_phys(u64 *pagemap, u64 virt)
 {
     u64 pml1_idx = (virt & (u64)0x1ff << 12) >> 12;
@@ -28,7 +30,7 @@ u64 virt_to_phys(u64 *pagemap, u64 virt)
     }
 
     u64 *pml1_table = (u64 *)HIGHER_HALF(pml2_table[pml2_idx] & 0x000FFFFFFFFFF000);
-    u64 phys_addr = pml1_table[pml1_idx];
+    u64 phys_addr = pml1_table[pml1_idx] & 0x000FFFFFFFFFF000;
 
     return phys_addr;
 }
@@ -111,7 +113,7 @@ void vmm_switch_pagemap(u64 *new_pagemap)
 
 int vmm_init()
 {
-    u64 *kernel_pagemap = (u64 *)HIGHER_HALF(pmm_request_page());
+    kernel_pagemap = (u64 *)HIGHER_HALF(pmm_request_page());
     if (kernel_pagemap == NULL)
     {
         ERROR("vmm", "Failed to allocate page for kernel pagemap.");

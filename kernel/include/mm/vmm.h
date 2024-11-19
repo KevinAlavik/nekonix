@@ -10,10 +10,13 @@
 #define VMM_NX (1ull << 63)
 #define VMM_USER 4
 
+extern u64 *kernel_pagemap;
+
 int vmm_init();
 void vmm_switch_pagemap(u64 *new_pagemap);
 u64 *vmm_new_pagemap();
 void vmm_map(u64 *pagemap, u64 virt, u64 phys, u64 flags);
+void vmm_unmap(u64 *pagemap, u64 virt);
 u64 virt_to_phys(u64 *pagemap, u64 virt);
 
 #endif // VMM_H
