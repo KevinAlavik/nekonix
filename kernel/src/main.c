@@ -262,6 +262,7 @@ void sys_entry(void)
     }
 
     printf("(Nekonix v%s.%s.%s%s)\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_NOTE);
+    pmm_dump();
 
     hlt();
 }

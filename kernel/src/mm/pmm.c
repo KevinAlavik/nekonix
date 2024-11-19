@@ -100,10 +100,18 @@ void pmm_dump()
             INFO("mm", "   * Page %llu: 0x%.16llx", i, stack.pages[i]);
         }
 
+        INFO("mm", " - Last 10 free pages (or fewer):");
+        for (u64 i = stack.idx - 1; i >= (stack.idx - 10 > 0 ? stack.idx - 10 : 0); i--)
+        {
+            INFO("mm", "   * Page %llu: 0x%.16llx", i, stack.pages[i]);
+        }
+
         INFO("mm", " - Total free pages: %llu", stack.idx);
     }
 
-    INFO("mm", " - High memory address: 0x%.16llx", stack.pages[(stack.idx ? stack.idx : 1) - 1]);
-    INFO("mm", " - Stack base address: 0x%.16llx", (u64)stack.pages);
+    INFO("mm", " - Total usable memory:\t%lld bytes", stack.max * PAGE_SIZE);
+    INFO("mm", " - Low memory address:\t0x%.16llx", stack.pages[0]);
+    INFO("mm", " - High memory address:\t0x%.16llx", stack.pages[(stack.idx ? stack.idx : 1) - 1]);
+    INFO("mm", " - Stack base address:\t0x%.16llx", (u64)stack.pages);
     INFO("mm", "----------------------");
 }
