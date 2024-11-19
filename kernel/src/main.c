@@ -12,10 +12,12 @@
 #include <lib/string.h>
 #include <mm/vmm.h>
 #include <mm/vma.h>
+#include <mm/liballoc/liballoc.h>
 
 u64 hhdm_offset;
 u64 __kernel_phys_base;
 u64 __kernel_virt_base;
+void *__kernel_vma_context;
 
 __attribute__((used, section(".limine_requests"))) static volatile LIMINE_BASE_REVISION(3);
 __attribute__((used, section(".limine_requests_start"))) static volatile LIMINE_REQUESTS_START_MARKER;
@@ -248,6 +250,8 @@ void memory_init(void)
 
     test_vmm(_VMM_TESTS, ctx);
 
+    __kernel_vma_context = ctx;
+
     INFO("boot", "Initialized VMM (%d errors reported), %d tests ran", vmm_error_count, _VMM_TESTS);
     if (vmm_error_count > 0)
     {
@@ -293,6 +297,16 @@ void sys_entry(void)
     }
 
     printf("(Nekonix v%s.%s.%s%s)\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_NOTE);
+
+    char *hello = (char *)kmalloc(strlen("Hello, Nekonix!"));
+    if (hello == NULL)
+    {
+        ERROR("boot", "Failed to allocate memory for 'hello' string, halting system.");
+        hcf();
+    }
+
+    strcpy(hello, "Hello, Nekonix!");
+    printf("%s\n", hello);
 
     hlt();
 }

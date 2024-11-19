@@ -24,7 +24,6 @@ void *memset(void *s, int c, usize n)
 
 void *memmove(void *dest, const void *src, usize n)
 {
-
     u8 *d = dest;
     const u8 *s = src;
     if (s > d)
@@ -53,4 +52,51 @@ int memcmp(const void *s1, const void *s2, usize n)
         p1++, p2++;
     }
     return 0;
+}
+
+usize strlen(const char *s)
+{
+    const char *p = s;
+    while (*p)
+        p++;
+    return (usize)(p - s);
+}
+
+char *strcpy(char *dest, const char *src)
+{
+    char *d = dest;
+    while ((*d++ = *src++))
+        ;
+    return dest;
+}
+
+char *strncpy(char *dest, const char *src, usize n)
+{
+    char *d = dest;
+    while (n && (*d++ = *src++))
+        n--;
+    while (n--)
+        *d++ = '\0';
+    return dest;
+}
+
+int strcmp(const char *s1, const char *s2)
+{
+    while (*s1 && (*s1 == *s2))
+    {
+        s1++;
+        s2++;
+    }
+    return *(unsigned char *)s1 - *(unsigned char *)s2;
+}
+
+int strncmp(const char *s1, const char *s2, usize n)
+{
+    while (n && *s1 && (*s1 == *s2))
+    {
+        s1++;
+        s2++;
+        n--;
+    }
+    return (n == 0) ? 0 : (*(unsigned char *)s1 - *(unsigned char *)s2);
 }

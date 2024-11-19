@@ -56,17 +56,22 @@
 #define DEBUG(scope, fmt, ...) (void)0
 #define NOTE(scope, fmt, ...) (void)0
 #define WARN(scope, fmt, ...) (void)0
-#else
+#else // __ERROR_LOG
 #define INFO(scope, fmt, ...) _LOG(scope, "info", fmt, ##__VA_ARGS__)
 #ifdef _DEBUG
 #define DEBUG(scope, fmt, ...) _LOG(scope, "debug", fmt, ##__VA_ARGS__)
-#else
+#else // _DEBUG
 #define DEBUG(scope, fmt, ...) (void)0
 #endif // _DEBUG
 #define NOTE(scope, fmt, ...) _LOG(scope, "note", fmt, ##__VA_ARGS__)
 #define WARN(scope, fmt, ...) _LOG(scope, "warn", fmt, ##__VA_ARGS__)
 #endif // _ERROR_LOG
 #define ERROR(scope, fmt, ...) _LOG(scope, "error", fmt, ##__VA_ARGS__)
+
+#ifdef _RELEASE
+#undef WARN
+#define WARN(scope, fmt, ...) (void)0
+#endif // _RELEASE
 
 extern u64 hhdm_offset;
 
@@ -81,5 +86,7 @@ extern char __data_end[];
 
 extern u64 __kernel_phys_base;
 extern u64 __kernel_virt_base;
+
+extern void *__kernel_vma_context;
 
 #endif // NNIX_H

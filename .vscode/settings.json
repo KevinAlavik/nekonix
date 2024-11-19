@@ -12,6 +12,10 @@
         "types.h": "c",
         "pmm.h": "c",
         "nnix.h": "c",
-        "limine.h": "c"
+        "limine.h": "c",
+        "stdlib.h": "c",
+        "liballoc.h": "c",
+        "vma.h": "c",
+        "vmm.h": "c"
     }
 }
