@@ -16,6 +16,10 @@
         "stdlib.h": "c",
         "liballoc.h": "c",
         "vma.h": "c",
-        "vmm.h": "c"
+        "vmm.h": "c",
+        "string.h": "c",
+        "serial_util.h": "c",
+        "scheduler.h": "c",
+        "idt.h": "c"
     }
 }

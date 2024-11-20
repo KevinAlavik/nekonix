@@ -41,3 +41,8 @@ u32 inl(u16 port)
     asm volatile("inl %1, %0" : "=a"(ret) : "Nd"(port));
     return ret;
 }
+
+void io_wait()
+{
+    outb(0x80, 0);
+}

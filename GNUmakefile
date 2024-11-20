@@ -72,7 +72,11 @@ kernel-deps:
 kernel: kernel-deps
 	$(MAKE) -C kernel
 
-$(IMAGE_NAME).iso: limine/limine kernel
+.PHONY: initrd
+initrd: initrd
+	./gen-initrd
+
+$(IMAGE_NAME).iso: limine/limine kernel initrd
 	rm -rf iso_root
 	mkdir -p iso_root/boot
 	cp -v kernel/bin/kernel iso_root/boot/
@@ -81,6 +85,7 @@ $(IMAGE_NAME).iso: limine/limine kernel
 	mkdir -p iso_root/EFI/BOOT
 	cp -v limine/BOOTX64.EFI iso_root/EFI/BOOT/
 	cp -v limine/BOOTIA32.EFI iso_root/EFI/BOOT/
+	cp -v initrd.img iso_root/boot/
 	xorriso -as mkisofs -R -r -J -b boot/limine/limine-bios-cd.bin \
 		-no-emul-boot -boot-load-size 4 -boot-info-table -hfsplus \
 		-apm-block-size 2048 --efi-boot boot/limine/limine-uefi-cd.bin \
@@ -100,6 +105,7 @@ $(IMAGE_NAME).hdd: limine/limine kernel
 	mcopy -i $(IMAGE_NAME).hdd@@1M limine.conf limine/limine-bios.sys ::/boot/limine
 	mcopy -i $(IMAGE_NAME).hdd@@1M limine/BOOTX64.EFI ::/EFI/BOOT
 	mcopy -i $(IMAGE_NAME).hdd@@1M limine/BOOTIA32.EFI ::/EFI/BOOT
+	mcopy -i $(IMAGE_NAME).hdd@@1M initrd.img ::/boot
 
 .PHONY: clean
 clean:

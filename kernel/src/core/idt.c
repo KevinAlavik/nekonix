@@ -93,10 +93,10 @@ int idt_init()
 typedef struct stack_frame
 {
     struct stack_frame *rbp;
-    uint64_t rip;
+    u64 rip;
 } stack_frame_t;
 
-void _backtrace(uint64_t caller)
+void _backtrace(u64 caller)
 {
     stack_frame_t *frame;
     asm volatile("mov %%rbp, %0" : "=r"(frame));
@@ -235,7 +235,7 @@ void idt_handler(int_frame_t frame)
             }
         }
     }
-    else if (frame.vector >= IRQ_BASE && frame.vector < IRQ_BASE + IRQ_COUNT) // Check for IRQs
+    else if (frame.vector >= IRQ_BASE && frame.vector < IRQ_BASE + IRQ_COUNT)
     {
         int irq = frame.vector - IRQ_BASE;
         DEBUG("interrupt", "Received IRQ %d", irq);

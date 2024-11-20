@@ -60,11 +60,14 @@
 #define INFO(scope, fmt, ...) _LOG(scope, "info", fmt, ##__VA_ARGS__)
 #ifdef _DEBUG
 #define DEBUG(scope, fmt, ...) _LOG(scope, "debug", fmt, ##__VA_ARGS__)
+#define LA_DEBUG(scope, fmt, ...) WARN(scope, "la_debug" fmt, ##__VA_ARGS__)
 #else // _DEBUG
 #define DEBUG(scope, fmt, ...) (void)0
+#define LA_DEBUG(scope, fmt, ...) (void)0
 #endif // _DEBUG
 #define NOTE(scope, fmt, ...) _LOG(scope, "note", fmt, ##__VA_ARGS__)
 #define WARN(scope, fmt, ...) _LOG(scope, "warn", fmt, ##__VA_ARGS__)
+#define LA_WARN(scope, fmt, ...) WARN(scope, "la_warn" fmt, ##__VA_ARGS__)
 #endif // _ERROR_LOG
 #define ERROR(scope, fmt, ...) _LOG(scope, "error", fmt, ##__VA_ARGS__)
 
@@ -72,6 +75,15 @@
 #undef WARN
 #define WARN(scope, fmt, ...) (void)0
 #endif // _RELEASE
+
+#ifndef _LA_LOGS
+#undef LA_WARN
+#undef LA_DEBUG
+#define LA_WARN(scope, fmt, ...) (void)0
+#define LA_DEBUG(scope, fmt, ...) (void)0
+#endif // _LA_LOGS
+
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 extern u64 hhdm_offset;
 

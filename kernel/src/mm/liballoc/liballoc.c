@@ -170,7 +170,7 @@ static struct liballoc_major *allocate_new_page(unsigned int size)
     if (maj == NULL)
     {
         l_warningCount += 1;
-        WARN("liballoc", "liballoc_alloc( %i ) return NULL", st);
+        LA_WARN("liballoc", "liballoc_alloc( %i ) return NULL", st);
         return NULL;
     }
 
@@ -183,8 +183,8 @@ static struct liballoc_major *allocate_new_page(unsigned int size)
 
     l_allocated += maj->size;
 
-    DEBUG("liballoc", "Resource allocated %x of %i pages (%i bytes) for %i size.", maj, st, maj->size, size);
-    DEBUG("liballoc", "Total memory usage = %i KB", (int)((l_allocated / (1024))));
+    LA_DEBUG("liballoc", "Resource allocated %x of %i pages (%i bytes) for %i size.", maj, st, maj->size, size);
+    LA_DEBUG("liballoc", "Total memory usage = %i KB", (int)((l_allocated / (1024))));
 
     return maj;
 }
@@ -210,8 +210,8 @@ void *PREFIX(malloc)(size_t req_size)
     if (size == 0)
     {
         l_warningCount += 1;
-        WARN("liballoc", "alloc( 0 ) called from %x",
-             __builtin_return_address(0));
+        LA_WARN("liballoc", "alloc( 0 ) called from %x",
+                __builtin_return_address(0));
 
         liballoc_unlock();
         return PREFIX(malloc)(1);
@@ -219,7 +219,7 @@ void *PREFIX(malloc)(size_t req_size)
 
     if (l_memRoot == NULL)
     {
-        DEBUG("liballoc", "initialization of liballoc " VERSION "");
+        LA_DEBUG("liballoc", "initialization of liballoc " VERSION "");
         l_memRoot = allocate_new_page(size);
         if (l_memRoot == NULL)
         {
@@ -228,12 +228,12 @@ void *PREFIX(malloc)(size_t req_size)
             return NULL;
         }
 
-        DEBUG("liballoc", "set up first memory major %x", l_memRoot);
+        LA_DEBUG("liballoc", "set up first memory major %x", l_memRoot);
     }
 
-    DEBUG("liballoc", "%x PREFIX(malloc)( %i ): ",
-          __builtin_return_address(0),
-          size);
+    LA_DEBUG("liballoc", "%x PREFIX(malloc)( %i ): ",
+             __builtin_return_address(0),
+             size);
 
     maj = l_memRoot;
     startedBet = 0;
@@ -264,7 +264,7 @@ void *PREFIX(malloc)(size_t req_size)
 
         if (diff < (size + sizeof(struct liballoc_minor)))
         {
-            WARN("liballoc", "CASE 1: Insufficient space in block %x", maj);
+            LA_WARN("liballoc", "CASE 1: Insufficient space in block %x", maj);
 
             if (maj->next != NULL)
             {
@@ -308,7 +308,7 @@ void *PREFIX(malloc)(size_t req_size)
 
             ALIGN(p);
 
-            WARN("liballoc", "CASE 2: returning %x", p);
+            LA_WARN("liballoc", "CASE 2: returning %x", p);
             liballoc_unlock();
             return p;
         }
@@ -340,7 +340,7 @@ void *PREFIX(malloc)(size_t req_size)
             p = (void *)((uintptr_t)(maj->first) + sizeof(struct liballoc_minor));
             ALIGN(p);
 
-            WARN("liballoc", "CASE 3: returning %x", p);
+            LA_WARN("liballoc", "CASE 3: returning %x", p);
             liballoc_unlock();
             return p;
         }
@@ -380,7 +380,7 @@ void *PREFIX(malloc)(size_t req_size)
                     p = (void *)((uintptr_t)min + sizeof(struct liballoc_minor));
                     ALIGN(p);
 
-                    WARN("liballoc", "CASE 4.1: returning %x", p);
+                    LA_WARN("liballoc", "CASE 4.1: returning %x", p);
                     liballoc_unlock();
                     return p;
                 }
@@ -414,7 +414,7 @@ void *PREFIX(malloc)(size_t req_size)
                     p = (void *)((uintptr_t)new_min + sizeof(struct liballoc_minor));
                     ALIGN(p);
 
-                    WARN("liballoc", "CASE 4.2: returning %x", p);
+                    LA_WARN("liballoc", "CASE 4.2: returning %x", p);
                     liballoc_unlock();
                     return p;
                 }
@@ -429,7 +429,7 @@ void *PREFIX(malloc)(size_t req_size)
 
         if (maj->next == NULL)
         {
-            WARN("liballoc", "CASE 5: block full");
+            LA_WARN("liballoc", "CASE 5: block full");
 
             if (startedBet == 1)
             {
@@ -451,8 +451,8 @@ void *PREFIX(malloc)(size_t req_size)
 
     liballoc_unlock();
 
-    WARN("liballoc", "All cases exhausted. No memory available.");
-    WARN("liballoc", "PREFIX(malloc)( %i ) returning NULL.", size);
+    LA_WARN("liballoc", "All cases exhausted. No memory available.");
+    LA_WARN("liballoc", "PREFIX(malloc)( %i ) returning NULL.", size);
     liballoc_dump();
 
     return NULL;
@@ -466,8 +466,8 @@ void PREFIX(free)(void *ptr)
     if (ptr == NULL)
     {
         l_warningCount += 1;
-        WARN("liballoc", "PREFIX(free)( NULL ) called from %x",
-             __builtin_return_address(0));
+        LA_WARN("liballoc", "PREFIX(free)( NULL ) called from %x",
+                __builtin_return_address(0));
 
         return;
     }
@@ -488,9 +488,9 @@ void PREFIX(free)(void *ptr)
             ((min->magic & 0xFF) == (LIBALLOC_MAGIC & 0xFF)))
         {
             l_possibleOverruns += 1;
-            WARN("liballoc", "Possible 1-3 byte overrun for magic %x != %x",
-                 min->magic,
-                 LIBALLOC_MAGIC);
+            LA_WARN("liballoc", "Possible 1-3 byte overrun for magic %x != %x",
+                    min->magic,
+                    LIBALLOC_MAGIC);
         }
 
         if (min->magic == LIBALLOC_DEAD)
@@ -510,9 +510,9 @@ void PREFIX(free)(void *ptr)
         return;
     }
 
-    DEBUG("liballoc", "%x PREFIX(free)( %x ): ",
-          __builtin_return_address(0),
-          ptr);
+    LA_DEBUG("liballoc", "%x PREFIX(free)( %x ): ",
+             __builtin_return_address(0),
+             ptr);
 
     maj = min->block;
 
@@ -555,7 +555,7 @@ void PREFIX(free)(void *ptr)
         }
     }
 
-    WARN("liballoc", "OK");
+    LA_WARN("liballoc", "OK");
 
     liballoc_unlock();
 }

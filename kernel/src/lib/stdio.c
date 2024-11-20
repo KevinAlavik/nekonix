@@ -88,7 +88,7 @@ int fprintf(void *stream, const char *fmt, ...)
     return length;
 }
 
-int snprintf(char *str, size_t size, const char *fmt, ...)
+int snprintf(char *str, usize size, const char *fmt, ...)
 {
     spinlock_acquire(&stdout_lock);
     va_list args;

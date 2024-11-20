@@ -13,6 +13,9 @@
 #include <mm/vmm.h>
 #include <mm/vma.h>
 #include <mm/liballoc/liballoc.h>
+#include <dev/vfs.h>
+#include <fs/ramfs.h>
+#include <dev/rtc.h>
 
 u64 hhdm_offset;
 u64 __kernel_phys_base;
@@ -35,6 +38,10 @@ __attribute__((used, section(".limine_requests"))) static volatile struct limine
 };
 __attribute__((used, section(".limine_requests"))) static volatile struct limine_kernel_address_request kernel_address_request = {
     .id = LIMINE_KERNEL_ADDRESS_REQUEST,
+    .response = 0,
+};
+__attribute__((used, section(".limine_requests"))) static volatile struct limine_module_request module_request = {
+    .id = LIMINE_MODULE_REQUEST,
     .response = 0,
 };
 __attribute__((used, section(".limine_requests_end"))) static volatile LIMINE_REQUESTS_END_MARKER;
@@ -119,6 +126,11 @@ void output_init(void)
     }
 
     putchar_impl = _MIRROR_LOG || _ERROR_LOG ? mirror_putchar : putchar_impl;
+}
+
+void time_init()
+{
+    rtc_init();
 }
 
 void interrupts_init(void)
@@ -262,8 +274,33 @@ void memory_init(void)
 
 void filesystem_init()
 {
-    // TODO: Implement and initialize VFS and mount necessary filesystems. For now only:
-    // - initrd
+    int vfs_error_count = 0;
+
+    if (vfs_init() != 0)
+    {
+        ERROR("boot", "Failed to initialize VFS (Virtual File System), unknown error.");
+        vfs_error_count++;
+    }
+
+    usize ramfs_size = module_request.response->modules[0]->size;
+    u8 *ramfs = (u8 *)module_request.response->modules[0]->address;
+    if (ramfs_init(ramfs, ramfs_size) != 0)
+    {
+        ERROR("boot", "Failed to initialize RAMFS (initrd), unkown error.");
+        vfs_error_count++;
+    }
+
+    INFO("boot", "Initialized VFS (%d errors reported)", vfs_error_count);
+    if (vfs_error_count > 0)
+    {
+        ERROR("boot", "Error(s) occurred during VFS initialization, resulting in system halt. Bye!");
+        hcf();
+    }
+}
+
+void init()
+{
+    // TODO: Initialize the scheduler and spawn /bin/init if it exists.
 }
 
 char *_text[] = {
@@ -290,15 +327,8 @@ void sys_entry(void)
 
     graphics_init();
     output_init();
+    time_init();
 
-    INFO("boot", "Nekonix (Nnix.) v%s.%s.%s%s (%dx%d)", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_NOTE, framebuffer_request.response->framebuffers[0]->width, framebuffer_request.response->framebuffers[0]->height);
-
-    interrupts_init();
-    memory_init();
-
-    filesystem_init();
-
-    printf("\n");
     for (int i = 0; _text[i] != NULL; i++)
     {
         printf("%s\n", _text[i]);
@@ -306,25 +336,18 @@ void sys_entry(void)
 
     printf("(Nekonix v%s.%s.%s%s)\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_NOTE);
 
-    char *hello = (char *)kmalloc(strlen("Hello, Nekonix!"));
-    if (hello == NULL)
-    {
-        ERROR("boot", "Failed to allocate memory for 'hello' string, halting system.");
-        hcf();
-    }
+    interrupts_init();
+    memory_init();
 
-    strcpy(hello, "Hello, Nekonix!");
-    printf("0x%.16llx: %s\n", (u64)hello, hello);
+    filesystem_init();
+    init();
 
-    char *bye = (char *)kmalloc(strlen("Goodbye, Nekonix!"));
-    if (bye == NULL)
-    {
-        ERROR("boot", "Failed to allocate memory for 'bye' string, halting system.");
-        hcf();
-    }
+    INFO("boot", "Finished initializing Nekonix.");
 
-    strcpy(bye, "Goodbye, Nekonix!");
-    printf("0x%.16llx: %s\n", (u64)bye, bye);
+    vfs_debug_ls(vfs_lookup("/"));
+
+    char *path = "/etc/motd";
+    printf("%s", vfs_debug_read(vfs_lookup(path)));
 
     hlt();
 }
