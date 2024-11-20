@@ -59,6 +59,30 @@ int printf(const char *fmt, ...)
     return length;
 }
 
+extern int flanterm_putchar(char);
+int f_printf(const char *fmt, ...)
+{
+
+    spinlock_acquire(&stdout_lock);
+    va_list args;
+    va_start(args, fmt);
+
+    char buffer[1024];
+    int length = npf_vsnprintf(buffer, sizeof(buffer), fmt, args);
+
+    if (length >= 0 && length < (int)sizeof(buffer))
+    {
+        for (int i = 0; i < length; i++)
+        {
+            flanterm_putchar(buffer[i]);
+        }
+    }
+
+    va_end(args);
+    spinlock_release(&stdout_lock);
+    return length;
+}
+
 int vfprintf(void *stream, const char *fmt, va_list args)
 {
     (void)stream;

@@ -106,6 +106,15 @@ else
         -D_GRAPHICAL_LOG=0
 endif
 
+ifeq ($(CONFIG_LOGGING_OPTION_SERIAL),y)
+    CONFIG_FLAGS += \
+        -D_GRAPHICAL_LOG=0
+else
+    CONFIG_FLAGS += \
+        -D_GRAPHICAL_LOG=1
+endif
+
+
 ifeq ($(CONFIG_LOGGING_OPTION_MIRROR),y)
     CONFIG_FLAGS += \
         -D_MIRROR_LOG=1

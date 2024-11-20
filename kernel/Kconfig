@@ -1,6 +1,6 @@
 mainmenu "Nekonix (Nnix.)/x86_64 0.0.0-unknown Kernel Configuration"
 
-# Build Type Options
+#Build Type Options
 choice
     prompt "Select Build Type"
     default BUILD_RELEASE
@@ -29,7 +29,16 @@ config LOGGING_OPTION_GRAPHICAL
     help
         Enable this option to display boot logs with graphical output.
         This provides a visually appealing output of kernel boot logs on
-        supported hardware, enhancing user experience.
+        supported hardware, enhancing debugging experience.
+
+
+config LOGGING_OPTION_SERIAL
+    bool "Serial Only"
+    default n
+    help
+        Enable this option to display boot logs with serial output.
+        This provides a visually appealing output of kernel boot logs on
+        supported serial ports, enhancing debugging experience.
 
 config LOGGING_OPTION_MIRROR
     bool "Mirrored"

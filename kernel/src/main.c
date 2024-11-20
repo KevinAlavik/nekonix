@@ -115,8 +115,6 @@ void output_init(void)
         putchar_impl = flanterm_putchar;
         if (!_GRAPHICAL_LOG && !_MIRROR_LOG)
         {
-            WARN("boot", "Graphical text output is disabled, refer to the kernel config. (%d)", _GRAPHICAL_LOG);
-            INFO("boot", "Logging is enabled on serial port: 0x%.2X", _stdout_port);
             putchar_impl = serial_putchar;
         }
     }
@@ -347,7 +345,7 @@ void sys_entry(void)
     vfs_debug_ls(vfs_lookup("/"));
 
     char *path = "/etc/motd";
-    printf("%s", vfs_debug_read(vfs_lookup(path)));
+    f_printf("%s", vfs_debug_read(vfs_lookup(path)));
 
     hlt();
 }
