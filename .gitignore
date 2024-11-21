@@ -9,5 +9,5 @@ nanoprintf.h
 kernel/src/flanterm/
 com1.txt
 initrd.img
-initrd/boot/limine.config
+initrd/boot/limine.conf
 initrd/boot/nnix-*
