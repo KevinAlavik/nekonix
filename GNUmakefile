@@ -74,8 +74,10 @@ kernel: kernel-deps
 
 .PHONY: initrd
 initrd: initrd
-	rm initrd/boot/nnix-*
+	rm -rf initrd/boot/nnix-*
 	ln kernel/bin/nnix-* initrd/boot/
+	rm -rf initrd/boot/limine.conf
+	ln limine.conf initrd/boot/limine.conf
 	./gen-initrd
 
 $(IMAGE_NAME).iso: limine/limine kernel initrd
