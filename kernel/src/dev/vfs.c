@@ -16,7 +16,9 @@ int vfs_init()
     g_vfs_root->next = NULL;
     g_vfs_root->name = strdup("/");
     g_vfs_root->type = VNODE_DIRECTORY;
-    g_vfs_root->permissions = VNODE_PERMS_READ | VNODE_PERMS_WRITE;
+    g_vfs_root->permissions = VNODE_PERMS_OWNER_READ | VNODE_PERMS_OWNER_WRITE | VNODE_PERMS_OWNER_EXECUTE |
+                              VNODE_PERMS_GROUP_READ | VNODE_PERMS_GROUP_EXECUTE |
+                              VNODE_PERMS_OTHERS_READ | VNODE_PERMS_OTHERS_EXECUTE;
     g_vfs_root->size = 0;
     g_vfs_root->uid = 0;
     g_vfs_root->data = NULL;
@@ -134,16 +136,11 @@ int vfs_chown(vnode_t *node, int uid)
     DEBUG("vfs", "Changed owner of Vnode: %s to %d", node->name, uid);
     return 0;
 }
+
 int vfs_read(vnode_t *node, u32 offset, u32 size, u8 *buffer)
 {
     if (!node || !buffer)
     {
-        return 1;
-    }
-
-    if (!(node->permissions & VNODE_PERMS_READ))
-    {
-        DEBUG("vfs", "Read denied for Vnode: %s (permissions: %d)", node->name, node->permissions);
         return 1;
     }
 
@@ -160,12 +157,6 @@ int vfs_write(vnode_t *node, u32 offset, u32 size, const u8 *buffer)
 {
     if (!node || !buffer)
     {
-        return 1;
-    }
-
-    if (!(node->permissions & VNODE_PERMS_WRITE))
-    {
-        WARN("vfs", "Write denied for Vnode: %s (permissions: %d)", node->name, node->permissions);
         return 1;
     }
 
@@ -323,12 +314,17 @@ void vfs_debug_ls(struct vnode *node)
 
     for (struct vnode *current = node->child; current; current = current->next)
     {
-
-        char perms[5] = {
+        char perms[11] = {
             (current->type == VNODE_DIRECTORY) ? 'd' : '-',
-            (current->permissions & VNODE_PERMS_READ) ? 'r' : '-',
-            (current->permissions & VNODE_PERMS_WRITE) ? 'w' : '-',
-            (current->permissions & VNODE_PERMS_EXECUTE) ? 'x' : '-',
+            (current->permissions & VNODE_PERMS_OWNER_READ) ? 'r' : '-',
+            (current->permissions & VNODE_PERMS_OWNER_WRITE) ? 'w' : '-',
+            (current->permissions & VNODE_PERMS_OWNER_EXECUTE) ? 'x' : '-',
+            (current->permissions & VNODE_PERMS_GROUP_READ) ? 'r' : '-',
+            (current->permissions & VNODE_PERMS_GROUP_WRITE) ? 'w' : '-',
+            (current->permissions & VNODE_PERMS_GROUP_EXECUTE) ? 'x' : '-',
+            (current->permissions & VNODE_PERMS_OTHERS_READ) ? 'r' : '-',
+            (current->permissions & VNODE_PERMS_OTHERS_WRITE) ? 'w' : '-',
+            (current->permissions & VNODE_PERMS_OTHERS_EXECUTE) ? 'x' : '-',
             '\0'};
 
         u64 timestamp = current->creation_time;
@@ -342,15 +338,16 @@ void vfs_debug_ls(struct vnode *node)
                  timestamp & 0xFF);
 
         INFO("vfs", "%s %s %8llu %s %s",
-             perms, "unkown", current->size, formatted_time, current->name);
+             perms, current->uid == 0 ? "root" : "unkown", current->size, formatted_time, current->name);
     }
 }
+
 #else
 void vfs_debug_ls(struct vnode *node)
 {
     (void)node;
 }
-#endif // _DEBUG
+#endif
 
 char *vfs_debug_read(struct vnode *node)
 {

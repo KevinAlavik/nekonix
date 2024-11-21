@@ -14,9 +14,17 @@ typedef enum
 
 typedef enum
 {
-    VNODE_PERMS_READ = 0x0001,
-    VNODE_PERMS_WRITE = 0x0002,
-    VNODE_PERMS_EXECUTE = 0x0004
+    VNODE_PERMS_OWNER_READ = 0x0001,    /* Read by owner */
+    VNODE_PERMS_OWNER_WRITE = 0x0002,   /* Write by owner */
+    VNODE_PERMS_OWNER_EXECUTE = 0x0004, /* Execute/search by owner */
+
+    VNODE_PERMS_GROUP_READ = 0x0010,    /* Read by group */
+    VNODE_PERMS_GROUP_WRITE = 0x0020,   /* Write by group */
+    VNODE_PERMS_GROUP_EXECUTE = 0x0040, /* Execute/search by group */
+
+    VNODE_PERMS_OTHERS_READ = 0x0100,   /* Read by others */
+    VNODE_PERMS_OTHERS_WRITE = 0x0200,  /* Write by others */
+    VNODE_PERMS_OTHERS_EXECUTE = 0x0400 /* Execute/search by others */
 } vnode_perms_t;
 
 typedef struct vnode
