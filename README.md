@@ -54,6 +54,10 @@ You can run directly using `qemu-system-x86_64` (expected to be in PATH):
 
 *Note: Read the Makefile for more information*
 
+## Known Issues
+
+- Issue with initializing VMM on UEFI, causes a #GP
+
 ## License
 
 Nnix. is licensed under the MIT license, see LICENSE file.

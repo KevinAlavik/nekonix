@@ -1,1 +1,10 @@
-hello from /etc/motd!
+ _   _       _        
+| \ | |_ __ (_)_  __  
+|  \| | '_ \| \ \/ /  
+| |\  | | | | |>  < _ 
+|_| \_|_| |_|_/_/\_(_)
+
+Welcome to Nekonix (Nnix.)
+ * Documentation: not available :(
+ 
+Edit /etc/motd to change this message, displayed on every boot

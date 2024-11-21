@@ -1,7 +1,13 @@
 MAKEFLAGS += -rR
 .SUFFIXES:
 
-override OUTPUT := kernel
+
+VERSION_MAJOR   := 1
+VERSION_MINOR   := 1
+VERSION_PATCH   := 2
+VERSION_NOTE    := -rosepine-alpha
+
+override OUTPUT := nnix-$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)$(VERSION_NOTE)
 override USER_VARIABLE = $(if $(filter $(origin $(1)),default undefined),$(eval override $(1) := $(2)))
 
 $(call USER_VARIABLE,DESTDIR,)
@@ -81,11 +87,6 @@ override HEADER_DEPS := $(addprefix obj/,$(CFILES:.c=.c.d) $(ASFILES:.S=.S.d))
 
 -include .config 
 CONFIG_FLAGS :=
-
-VERSION_MAJOR   := 1
-VERSION_MINOR   := 1
-VERSION_PATCH   := 2
-VERSION_NOTE    := -rosepine-alpha
 
 ifeq ($(CONFIG_BUILD_DEBUG),y)
 	CONFIG_FLAGS += \

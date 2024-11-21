@@ -338,15 +338,15 @@ void sys_entry(void)
     memory_init();
 
     filesystem_init();
-    init();
 
     INFO("boot", "Finished initializing Nekonix.");
 
     vfs_debug_ls(vfs_lookup("/"));
     vfs_debug_ls(vfs_lookup("/boot"));
 
-    char *path = "/boot/limine.conf";
-    f_printf("%s", vfs_debug_read(vfs_lookup(path)));
+    init();
+
+    f_printf("%s\n", vfs_debug_read(vfs_lookup("/etc/motd")));
 
     hlt();
 }
