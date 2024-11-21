@@ -30,19 +30,19 @@ typedef struct ustar_header
     char padding[12];
 } ustar_header_t;
 
-#define TSUID 04000   /* set UID on execution */
-#define TSGID 02000   /* set GID on execution */
-#define TSVTX 01000   /* reserved */
-                      /* file permissions */
-#define TUREAD 00400  /* read by owner */
-#define TUWRITE 00200 /* write by owner */
-#define TUEXEC 00100  /* execute/search by owner */
-#define TGREAD 00040  /* read by group */
-#define TGWRITE 00020 /* write by group */
-#define TGEXEC 00010  /* execute/search by group */
-#define TOREAD 00004  /* read by other */
-#define TOWRITE 00002 /* write by other */
-#define TOEXEC 00001  /* execute/search by other */
+#define TSUID 04000
+#define TSGID 02000
+#define TSVTX 01000
+
+#define TUREAD 00400
+#define TUWRITE 00200
+#define TUEXEC 00100
+#define TGREAD 00040
+#define TGWRITE 00020
+#define TGEXEC 00010
+#define TOREAD 00004
+#define TOWRITE 00002
+#define TOEXEC 00001
 
 u8 *ramfs_data;
 usize ramfs_size;
@@ -69,6 +69,7 @@ int ramfs_parse(struct vnode *parent)
 
         u32 file_size = strtol(header->size, NULL, 8);
         bool is_directory = header->typeflag == '5';
+        int mode = strtol(header->mode, NULL, 8);
 
         char *name = header->name;
         if (strncmp(header->name, "./", 2) == 0)
@@ -94,15 +95,24 @@ int ramfs_parse(struct vnode *parent)
             {
                 if (is_directory)
                 {
-                    if (vfs_create(current_parent, token, VNODE_DIRECTORY,
-                                   VNODE_PERMS_OWNER_READ | VNODE_PERMS_OWNER_WRITE | VNODE_PERMS_OWNER_EXECUTE |
-                                       VNODE_PERMS_GROUP_READ | VNODE_PERMS_GROUP_EXECUTE |
-                                       VNODE_PERMS_OTHERS_READ | VNODE_PERMS_OTHERS_EXECUTE,
+                    u32 permissions = 0;
+                    permissions |= (mode & TUREAD) ? VNODE_PERMS_OWNER_READ : 0;
+                    permissions |= (mode & TUWRITE) ? VNODE_PERMS_OWNER_WRITE : 0;
+                    permissions |= (mode & TUEXEC) ? VNODE_PERMS_OWNER_EXECUTE : 0;
+                    permissions |= (mode & TGREAD) ? VNODE_PERMS_GROUP_READ : 0;
+                    permissions |= (mode & TGWRITE) ? VNODE_PERMS_GROUP_WRITE : 0;
+                    permissions |= (mode & TGEXEC) ? VNODE_PERMS_GROUP_EXECUTE : 0;
+                    permissions |= (mode & TOREAD) ? VNODE_PERMS_OTHERS_READ : 0;
+                    permissions |= (mode & TOWRITE) ? VNODE_PERMS_OTHERS_WRITE : 0;
+                    permissions |= (mode & TOEXEC) ? VNODE_PERMS_OTHERS_EXECUTE : 0;
+                    if (vfs_create(current_parent, token, VNODE_DIRECTORY, permissions,
                                    &subdir) != 0)
                     {
                         ERROR("ramfs", "Failed to create directory \"%s\" under \"%s\".", token, current_parent->name);
                         return 1;
                     }
+
+                    subdir->creation_time = get_rtc_timestamp();
                 }
                 else
                 {
@@ -126,65 +136,17 @@ int ramfs_parse(struct vnode *parent)
                 struct vnode *new_file;
                 DEBUG("ramfs", "Creating file \"%s\" in directory \"%s\".", file_name, current_parent->name);
 
-                int mode = strtol(header->mode, NULL, 8);
                 u32 permissions = 0;
 
-                switch (mode & 07777)
-                { // Mask only the permission bits (last 12 bits)
-                case TUREAD:
-                    permissions |= VNODE_PERMS_OWNER_READ;
-                    break;
-                case TUWRITE:
-                    permissions |= VNODE_PERMS_OWNER_WRITE;
-                    break;
-                case TUEXEC:
-                    permissions |= VNODE_PERMS_OWNER_EXECUTE;
-                    break;
-
-                case TGREAD:
-                    permissions |= VNODE_PERMS_GROUP_READ;
-                    break;
-                case TGWRITE:
-                    permissions |= VNODE_PERMS_GROUP_WRITE;
-                    break;
-                case TGEXEC:
-                    permissions |= VNODE_PERMS_GROUP_EXECUTE;
-                    break;
-
-                case TOREAD:
-                    permissions |= VNODE_PERMS_OTHERS_READ;
-                    break;
-                case TOWRITE:
-                    permissions |= VNODE_PERMS_OTHERS_WRITE;
-                    break;
-                case TOEXEC:
-                    permissions |= VNODE_PERMS_OTHERS_EXECUTE;
-                    break;
-
-                default:
-                    if (mode & TUREAD)
-                        permissions |= VNODE_PERMS_OWNER_READ;
-                    if (mode & TUWRITE)
-                        permissions |= VNODE_PERMS_OWNER_WRITE;
-                    if (mode & TUEXEC)
-                        permissions |= VNODE_PERMS_OWNER_EXECUTE;
-
-                    if (mode & TGREAD)
-                        permissions |= VNODE_PERMS_GROUP_READ;
-                    if (mode & TGWRITE)
-                        permissions |= VNODE_PERMS_GROUP_WRITE;
-                    if (mode & TGEXEC)
-                        permissions |= VNODE_PERMS_GROUP_EXECUTE;
-
-                    if (mode & TOREAD)
-                        permissions |= VNODE_PERMS_OTHERS_READ;
-                    if (mode & TOWRITE)
-                        permissions |= VNODE_PERMS_OTHERS_WRITE;
-                    if (mode & TOEXEC)
-                        permissions |= VNODE_PERMS_OTHERS_EXECUTE;
-
-                    break;
-                }
+                permissions |= (mode & TUREAD) ? VNODE_PERMS_OWNER_READ : 0;
+                permissions |= (mode & TUWRITE) ? VNODE_PERMS_OWNER_WRITE : 0;
+                permissions |= (mode & TUEXEC) ? VNODE_PERMS_OWNER_EXECUTE : 0;
+                permissions |= (mode & TGREAD) ? VNODE_PERMS_GROUP_READ : 0;
+                permissions |= (mode & TGWRITE) ? VNODE_PERMS_GROUP_WRITE : 0;
+                permissions |= (mode & TGEXEC) ? VNODE_PERMS_GROUP_EXECUTE : 0;
+                permissions |= (mode & TOREAD) ? VNODE_PERMS_OTHERS_READ : 0;
+                permissions |= (mode & TOWRITE) ? VNODE_PERMS_OTHERS_WRITE : 0;
+                permissions |= (mode & TOEXEC) ? VNODE_PERMS_OTHERS_EXECUTE : 0;
 
                 if (vfs_create(current_parent, file_name, VNODE_FILE, permissions, &new_file) != 0)
                 {
@@ -192,6 +154,7 @@ int ramfs_parse(struct vnode *parent)
                     return 1;
                 }
 
+                new_file->creation_time = get_rtc_timestamp();
                 new_file->data = (u8 *)kmalloc(file_size);
                 if (!new_file->data)
                 {
@@ -226,7 +189,6 @@ int ramfs_init(u8 *data, usize size)
     initrd->type = VNODE_DIRECTORY;
     initrd->size = size;
 
-    // Set RAMFS root directory permissions (rwx for owner, rx for group and others)
     initrd->permissions = VNODE_PERMS_OWNER_READ | VNODE_PERMS_OWNER_WRITE | VNODE_PERMS_OWNER_EXECUTE |
                           VNODE_PERMS_GROUP_READ | VNODE_PERMS_GROUP_EXECUTE |
                           VNODE_PERMS_OTHERS_READ | VNODE_PERMS_OTHERS_EXECUTE;

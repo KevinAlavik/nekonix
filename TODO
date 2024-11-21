@@ -1,0 +1,3 @@
+(A) Implement APIC +Nekonix/Interrupts
+(A) Implement Scheduler +Nekonix/Core
+(B) Switch VFS to use UNIX timestamps +Nekonix/VFS
