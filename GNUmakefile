@@ -122,6 +122,3 @@ distclean: clean
 	$(MAKE) -C kernel distclean
 	rm -rf kernel-deps limine ovmf
 
-.PHONY: menuconfig
-menuconfig:
-	$(MAKE) -C kernel menuconfig
