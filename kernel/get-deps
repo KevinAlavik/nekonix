@@ -84,7 +84,7 @@ download_by_hash \
 #     include/lib/nanoprintf.h \
 #     98641bce2d50c498d1b091464d505e69b818c03bd90bf9b15a37e8be8698e40e
 
-# clone_repo_commit \
-#     https://github.com/mintsuki/flanterm.git \
-#     src/flanterm \
-#     a6f6edd6631c01caab932a59dce97bbd5f0c72c8
+clone_repo_commit \
+    https://github.com/mintsuki/flanterm.git \
+    src/flanterm \
+    a6f6edd6631c01caab932a59dce97bbd5f0c72c8

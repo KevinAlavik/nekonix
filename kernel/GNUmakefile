@@ -20,7 +20,7 @@ $(call USER_VARIABLE,NASMFLAGS,-F dwarf -g)
 $(call USER_VARIABLE,LDFLAGS,)
 
 ifneq ($(shell ( test '$(MAKECMDGOALS)' = clean || test '$(MAKECMDGOALS)' = distclean || test '$(MAKECMDGOALS)' = menuconfig ); echo $$?),0)
-    ifeq ($(shell ( ! test -d freestnd-c-hdrs-0bsd || ! test -d cc-runtime || ! test -f include/boot/limine.h ); echo $$?),0)
+    ifeq ($(shell ( ! test -d freestnd-c-hdrs-0bsd || ! test -d cc-runtime || ! test -f include/boot/limine.h || ! test -d src/flanterm ); echo $$?),0)
         $(error Please run the ./get-deps script first)
     endif
 endif

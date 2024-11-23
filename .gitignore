@@ -11,4 +11,3 @@ com1.txt
 initrd.img
 initrd/boot/limine.conf
 initrd/boot/nnix-*
-kernel-old/

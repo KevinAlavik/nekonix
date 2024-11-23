@@ -2,6 +2,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <boot/limine.h>
+#include <flanterm/flanterm.h>
+#include <flanterm/backends/fb.h>
 
 __attribute__((used, section(".limine_requests"))) static volatile LIMINE_BASE_REVISION(3);
 
@@ -99,11 +101,23 @@ void sys_entry(void)
 
     struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
 
-    for (size_t i = 0; i < 100; i++)
+    struct flanterm_context *ft_ctx = flanterm_fb_init(
+        NULL, NULL,
+        framebuffer->address, framebuffer->width, framebuffer->height, framebuffer->pitch,
+        framebuffer->red_mask_size, framebuffer->red_mask_shift,
+        framebuffer->green_mask_size, framebuffer->green_mask_shift,
+        framebuffer->blue_mask_size, framebuffer->blue_mask_shift,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 1, 0, 0, 0, 0);
+
+    if (ft_ctx == NULL)
     {
-        volatile uint32_t *fb_ptr = framebuffer->address;
-        fb_ptr[i * (framebuffer->pitch / 4) + i] = 0xffffff;
+        hcf();
     }
+
+    ft_ctx->cursor_enabled = false;
+    ft_ctx->full_refresh(ft_ctx);
+
+    flanterm_write(ft_ctx, "Nekonix Rewrite\n", 16);
 
     hcf();
 }
