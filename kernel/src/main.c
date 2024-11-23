@@ -296,11 +296,6 @@ void filesystem_init()
     }
 }
 
-void init()
-{
-    // TODO: Initialize the scheduler and spawn /bin/init if it exists.
-}
-
 char *_text[] = {
     " _   _       _        ",
     "| \\ | |_ __ (_)_  __  ",
@@ -310,6 +305,7 @@ char *_text[] = {
     "                      ",
     NULL};
 
+extern void sys_post(void);
 void sys_entry(void)
 {
     _stdout_port = 0xE9;
@@ -344,9 +340,7 @@ void sys_entry(void)
     vfs_debug_ls(vfs_lookup("/"));
     vfs_debug_ls(vfs_lookup("/boot"));
 
-    init();
-
-    f_printf("%s\n", vfs_debug_read(vfs_lookup("/etc/motd")));
+    sys_post();
 
     hlt();
 }
