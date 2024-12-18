@@ -1,0 +1,2 @@
+CompileFlags:
+  Add: [-Ikernel/include, -Ikernel/src]

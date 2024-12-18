@@ -301,7 +301,6 @@ const char *vfs_get_path(struct vnode *node)
     return path;
 }
 
-#ifdef _DEBUG
 void vfs_debug_ls(struct vnode *node)
 {
     if (!node)
@@ -341,13 +340,6 @@ void vfs_debug_ls(struct vnode *node)
              perms, current->uid == 0 ? "root" : "unkown", current->size, formatted_time, current->name);
     }
 }
-
-#else
-void vfs_debug_ls(struct vnode *node)
-{
-    (void)node;
-}
-#endif
 
 char *vfs_debug_read(struct vnode *node)
 {

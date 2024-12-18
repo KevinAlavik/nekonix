@@ -4,7 +4,7 @@ MAKEFLAGS += -rR
 GENERIC_QEMUFLAGS := -m 2G
 GENERIC_QEMUFLAGS += -M q35
 GENERIC_QEMUFLAGS += -boot d
-GENERIC_QEMUFLAGS += -debugcon stdio
+GENERIC_QEMUFLAGS += -serial stdio
 
 QEMUFLAGS ?= 
 
@@ -120,6 +120,3 @@ distclean: clean
 	$(MAKE) -C kernel distclean
 	rm -rf kernel-deps limine ovmf
 
-.PHONY: menuconfig
-menuconfig:
-	$(MAKE) -C kernel menuconfig

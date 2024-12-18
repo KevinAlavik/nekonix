@@ -59,6 +59,7 @@ int printf(const char *fmt, ...)
     return length;
 }
 
+// DEPRECATED: use normal printf instead.
 extern int flanterm_putchar(char);
 int f_printf(const char *fmt, ...)
 {

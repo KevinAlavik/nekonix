@@ -3,6 +3,7 @@
 
 #include <lib/stdio.h>
 #include <lib/types.h>
+#include <flanterm/flanterm.h>
 
 #ifndef VERSION_MAJOR
 #define VERSION_MAJOR "0"
@@ -20,61 +21,23 @@
 #define VERSION_NOTE "-unkown"
 #endif // VERSION_NOTE
 
-#ifndef _GRAPHICAL_LOG
-#define _GRAPHICAL_LOG 0
-#endif // _GRAPHICAL_LOG
-
-#ifndef _MIRROR_LOG
-#define _MIRROR_LOG 0
-#endif // MIRROR_LOG
-
-#ifndef _ERROR_LOG
-#define _ERROR_LOG 0
-#endif // __ERROR_LOG
-
-#ifndef _NO_LOG
-#define _NO_LOG 0
-#endif // __NO_LOG
-
-#ifndef _PMM_TESTS
-#define _PMM_TESTS 10
-#endif // _PMM_TESTS
-
-#ifndef _VMM_TESTS
-#define _VMM_TESTS 10
-#endif // _VMM_TESTS
-
-#if _NO_LOG
-#define _LOG(scope, level, fmt, ...) (void)0
-#else
 #define _LOG(scope, level, fmt, ...) \
-    printf("nnix@%s/%s: " fmt "\n", scope, level, ##__VA_ARGS__);
-#endif // _NO_LOG
+    printf("[ %s()::%s ]: " fmt "\n", __func__, level, ##__VA_ARGS__);
 
-#if _ERROR_LOG
-#define INFO(scope, fmt, ...) (void)0
-#define DEBUG(scope, fmt, ...) (void)0
-#define NOTE(scope, fmt, ...) (void)0
-#define WARN(scope, fmt, ...) (void)0
-#else // __ERROR_LOG
-#define INFO(scope, fmt, ...) _LOG(scope, "info", fmt, ##__VA_ARGS__)
+#define INFO(scope, fmt, ...) _LOG(scope, "INFO", fmt, ##__VA_ARGS__)
+
 #ifdef _DEBUG
-#define DEBUG(scope, fmt, ...) _LOG(scope, "debug", fmt, ##__VA_ARGS__)
-#define LA_DEBUG(scope, fmt, ...) WARN(scope, "la_debug" fmt, ##__VA_ARGS__)
+#define DEBUG(scope, fmt, ...) _LOG(scope, "DEBUG", fmt, ##__VA_ARGS__)
+#define LA_DEBUG(scope, fmt, ...) WARN(scope, "DEBUG" fmt, ##__VA_ARGS__)
 #else // _DEBUG
 #define DEBUG(scope, fmt, ...) (void)0
 #define LA_DEBUG(scope, fmt, ...) (void)0
 #endif // _DEBUG
-#define NOTE(scope, fmt, ...) _LOG(scope, "note", fmt, ##__VA_ARGS__)
-#define WARN(scope, fmt, ...) _LOG(scope, "warn", fmt, ##__VA_ARGS__)
-#define LA_WARN(scope, fmt, ...) WARN(scope, "la_warn" fmt, ##__VA_ARGS__)
-#endif // _ERROR_LOG
-#define ERROR(scope, fmt, ...) _LOG(scope, "error", fmt, ##__VA_ARGS__)
 
-#ifdef _RELEASE
-#undef WARN
-#define WARN(scope, fmt, ...) (void)0
-#endif // _RELEASE
+#define NOTE(scope, fmt, ...) _LOG(scope, "NOTE", fmt, ##__VA_ARGS__)
+#define WARN(scope, fmt, ...) _LOG(scope, "WARN", fmt, ##__VA_ARGS__)
+#define LA_WARN(scope, fmt, ...) WARN(scope, "WARN" fmt, ##__VA_ARGS__)
+#define ERROR(scope, fmt, ...) _LOG(scope, "ERROR", fmt, ##__VA_ARGS__)
 
 #ifndef _LA_LOGS
 #undef LA_WARN
@@ -100,5 +63,9 @@ extern u64 __kernel_phys_base;
 extern u64 __kernel_virt_base;
 
 extern void *__kernel_vma_context;
+
+extern struct flanterm_context *ft_ctx;
+
+#define LS(path) vfs_debug_ls(vfs_lookup(path))
 
 #endif // NNIX_H

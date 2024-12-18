@@ -85,68 +85,8 @@ override NASMFILES := $(shell cd src && find -L * -type f -name '*.asm' | LC_ALL
 override OBJ := $(addprefix obj/,$(CFILES:.c=.c.o) $(ASFILES:.S=.S.o) $(NASMFILES:.asm=.asm.o))
 override HEADER_DEPS := $(addprefix obj/,$(CFILES:.c=.c.d) $(ASFILES:.S=.S.d))
 
--include .config 
-CONFIG_FLAGS :=
-
-ifeq ($(CONFIG_BUILD_DEBUG),y)
-	CONFIG_FLAGS += \
-		-D_DEBUG
-	VERSION_NOTE += -dev
-endif
-
-ifeq ($(CONFIG_BUILD_RELEASE),y)
-	CONFIG_FLAGS += \
-		-D_RELEASE
-endif
-
-ifeq ($(CONFIG_LOGGING_OPTION_GRAPHICAL),y)
-    CONFIG_FLAGS += \
-        -D_GRAPHICAL_LOG=1
-else
-    CONFIG_FLAGS += \
-        -D_GRAPHICAL_LOG=0
-endif
-
-ifeq ($(CONFIG_LOGGING_OPTION_SERIAL),y)
-    CONFIG_FLAGS += \
-        -D_GRAPHICAL_LOG=0
-else
-    CONFIG_FLAGS += \
-        -D_GRAPHICAL_LOG=1
-endif
-
-
-ifeq ($(CONFIG_LOGGING_OPTION_MIRROR),y)
-    CONFIG_FLAGS += \
-        -D_MIRROR_LOG=1
-else
-    CONFIG_FLAGS += \
-        -D_MIRROR_LOG=0
-endif
-
-ifeq ($(CONFIG_LOGGING_OPTION_ERROR_ONLY),y)
-    CONFIG_FLAGS += \
-        -D_ERROR_LOG=1
-else
-    CONFIG_FLAGS += \
-        -D_ERROR_LOG=0
-endif
-
-ifeq ($(CONFIG_LOGGING_OPTION_NO_LOGGING),y)
-    CONFIG_FLAGS += \
-        -D_NO_LOG=1
-else
-    CONFIG_FLAGS += \
-        -D_NO_LOG=0
-endif
-
-
-CONFIG_PMM_TEST_AMOUNT ?= 10
-
 VERSION_NOTE := $(shell echo $(VERSION_NOTE) | tr -d '[:space:]')
 CONFIG_FLAGS += -DVERSION_MAJOR=\"$(VERSION_MAJOR)\" -DVERSION_MINOR=\"$(VERSION_MINOR)\" -DVERSION_PATCH=\"$(VERSION_PATCH)\" -DVERSION_NOTE=\"$(VERSION_NOTE)\"
-
-CONFIG_FLAGS += -D_PMM_TESTS=$(CONFIG_PMM_TEST_AMOUNT) -D_VMM_TESTS=$(CONFIG_VMM_TEST_AMOUNT)
 
 .PHONY: all
 all: .config bin/$(OUTPUT)
@@ -195,10 +135,3 @@ install: all
 uninstall:
 	rm -f "$(DESTDIR)$(PREFIX)/share/$(OUTPUT)/$(OUTPUT)"
 	-rmdir "$(DESTDIR)$(PREFIX)/share/$(OUTPUT)"
-
-KCONFIG ?= kconfig-mconf
-
-.PHONY: menuconfig
-menuconfig: Kconfig
-	@$(KCONFIG) Kconfig
-	@$(MAKE) clean

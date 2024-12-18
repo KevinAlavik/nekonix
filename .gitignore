@@ -6,8 +6,10 @@
 limine.h
 nanoprintf.h
 .config*
-kernel/src/flanterm/
+/kernel/src/flanterm/
 com1.txt
 initrd.img
-initrd/boot/limine.conf
-initrd/boot/nnix-*
+/initrd/boot/limine.conf
+/initrd/boot/nnix-*
+/.vscode
+/.cache

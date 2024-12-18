@@ -2,6 +2,7 @@
 #include <lib/stdio.h>
 #include <lib/types.h>
 #include <lib/string.h>
+#include <boot/nnix.h>
 
 u64 *kernel_pagemap;
 
@@ -126,27 +127,32 @@ int vmm_init()
     {
         vmm_map(kernel_pagemap, reqs, reqs - __kernel_virt_base + __kernel_phys_base, VMM_PRESENT | VMM_WRITABLE);
     }
+    INFO("vmm", "Mapped Limine Requests region.");
 
     for (uptr text = ALIGN_DOWN(__text_start, PAGE_SIZE); text < ALIGN_UP(__text_end, PAGE_SIZE); text += PAGE_SIZE)
     {
         vmm_map(kernel_pagemap, text, text - __kernel_virt_base + __kernel_phys_base, VMM_PRESENT);
     }
-
+    INFO("vmm", "Mapped .text region.");
+    
     for (uptr rodata = ALIGN_DOWN(__rodata_start, PAGE_SIZE); rodata < ALIGN_UP(__rodata_end, PAGE_SIZE); rodata += PAGE_SIZE)
     {
         vmm_map(kernel_pagemap, rodata, rodata - __kernel_virt_base + __kernel_phys_base, VMM_PRESENT | VMM_NX);
     }
+    INFO("vmm", "Mapped .rodata region.");
 
     for (uptr data = ALIGN_DOWN(__data_start, PAGE_SIZE); data < ALIGN_UP(__data_end, PAGE_SIZE); data += PAGE_SIZE)
     {
         vmm_map(kernel_pagemap, data, data - __kernel_virt_base + __kernel_phys_base, VMM_PRESENT | VMM_WRITABLE | VMM_NX);
     }
+    INFO("vmm", "Mapped .data region.");
 
     for (uptr gb4 = 0; gb4 < 0x100000000; gb4 += PAGE_SIZE)
     {
         vmm_map(kernel_pagemap, (uptr)gb4, gb4, VMM_PRESENT | VMM_WRITABLE);
         vmm_map(kernel_pagemap, (uptr)HIGHER_HALF(gb4), gb4, VMM_PRESENT | VMM_WRITABLE);
     }
+    INFO("vmm", "Mapped HHDM.");
 
     vmm_switch_pagemap(kernel_pagemap);
 
