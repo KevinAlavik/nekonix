@@ -1,4 +1,5 @@
 #include <mm/pmm.h>
+#include <lib/string.h>
 
 pmm_stack_t stack;
 struct limine_memmap_response *_memmap;
@@ -62,6 +63,7 @@ void *pmm_request_page()
     }
 
     u64 page_addr = stack.pages[--stack.idx];
+    memset(HIGHER_HALF(page_addr), 0, PAGE_SIZE);
     return (void *)page_addr;
 }
 

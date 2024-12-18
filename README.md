@@ -5,7 +5,7 @@
 
 <img src="https://github.com/KevinAlavik/nekonix/blob/main/assets/nnix-dark.png?raw=true" width="150">
 
-Nnix. is a hobby UNIX-like operating system for the x86_64 architecture.
+Nnix. is a hobby operating system for the x86_64 architecture.
 
 ## Building
 
@@ -53,10 +53,6 @@ You can run directly using `qemu-system-x86_64` (expected to be in PATH):
     *Note: Additional QEMU flags works in the same way as in BIOS-ISO*
 
 *Note: Read the Makefile for more information*
-
-## Known Issues
-
-- Issue with initializing VMM on UEFI, causes a #GP
 
 ## License
 
