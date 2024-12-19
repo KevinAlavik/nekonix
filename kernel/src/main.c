@@ -16,6 +16,7 @@
 #include <dev/vfs.h>
 #include <fs/ramfs.h>
 #include <dev/rtc.h>
+#include <dev/hvfs.h>
 
 #define _PMM_TESTS 10
 #define _VMM_TESTS 10
@@ -179,6 +180,7 @@ void sys_entry(void) {
         printf("%s\n", _text[i]);
     }
 
+    // Display kernel version
     printf("(Nekonix v%s.%s.%s%s)\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_NOTE);
 
     // Interrupts initialization
@@ -276,9 +278,21 @@ void sys_entry(void) {
 
     INFO("boot", "Finished initializing Nekonix.");
 
-    // Now we are done!
-    ft_ctx->clear(ft_ctx, true);
-    printf("nekonix my ass");
+    FILE* test = open("/test", READ_WRITE);
+    if(test == NULL) {
+        ERROR("boot", "Failed to open /test.");
+        hcf();
+    }
+
+    write(test, "Hello, World!\n", 14);
+
+    char buffer[256];
+    read(test, buffer, sizeof(buffer));
+    close(test);
+
+    printf("%s", buffer);
+
+    LS("/");
 
     hlt();
 }
