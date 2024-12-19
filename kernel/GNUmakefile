@@ -89,7 +89,7 @@ VERSION_NOTE := $(shell echo $(VERSION_NOTE) | tr -d '[:space:]')
 CONFIG_FLAGS += -DVERSION_MAJOR=\"$(VERSION_MAJOR)\" -DVERSION_MINOR=\"$(VERSION_MINOR)\" -DVERSION_PATCH=\"$(VERSION_PATCH)\" -DVERSION_NOTE=\"$(VERSION_NOTE)\"
 
 .PHONY: all
-all: .config bin/$(OUTPUT)
+all: bin/$(OUTPUT)
 
 cc-runtime-x86_64/cc-runtime.a: cc-runtime/*
 	rm -rf cc-runtime-x86_64
