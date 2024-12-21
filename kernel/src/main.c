@@ -53,15 +53,18 @@ __attribute__((used, section(".limine_requests_end"))) static volatile LIMINE_RE
 struct flanterm_context *ft_ctx;
 
 // Output callbacks.
-int serial_putchar(char c) {
+int serial_putchar(char c)
+{
     outb(_stdout_port, c);
-    if (c == '\n') {
+    if (c == '\n')
+    {
         outb(_stdout_port, '\r');
     }
     return c;
 }
 
-int flanterm_putchar(char c) {
+int flanterm_putchar(char c)
+{
     flanterm_write(ft_ctx, &c, 1);
     return c;
 }
@@ -120,12 +123,14 @@ int test_vmm(int tests, vma_context_t *ctx)
 }
 
 // Kernel entry point.
-void sys_entry(void) {
+void sys_entry(void)
+{
     // Serial output setup
     _stdout_port = 0xE9;
     putchar_impl = serial_putchar;
 
-    if (!LIMINE_BASE_REVISION_SUPPORTED) {
+    if (!LIMINE_BASE_REVISION_SUPPORTED)
+    {
         ERROR("boot", "Limine Base Revision is not supported.");
         hcf();
     }
@@ -133,13 +138,15 @@ void sys_entry(void) {
     _stdout_port = serial_get_new();
 
     // Graphics initialization
-    if (!framebuffer_request.response) {
+    if (!framebuffer_request.response)
+    {
         WARN("boot", "Failed to get framebuffer.");
         hcf();
     }
 
     struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
-    if (!framebuffer) {
+    if (!framebuffer)
+    {
         WARN("boot", "No framebuffers available.");
         hcf();
     }
@@ -152,10 +159,13 @@ void sys_entry(void) {
         framebuffer->blue_mask_size, framebuffer->blue_mask_shift,
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 1, 0, 0, 0, 0);
 
-    if (!ft_ctx) {
+    if (!ft_ctx)
+    {
         WARN("boot", "Failed to initialize Flanterm.");
         hcf();
-    } else {
+    }
+    else
+    {
         ft_ctx->cursor_enabled = false;
         ft_ctx->full_refresh(ft_ctx);
     }
@@ -173,10 +183,10 @@ void sys_entry(void) {
         "| |\\  | | | | |>  < _ ",
         "|_| \\_|_| |_|_/_/\\_(_)",
         "                      ",
-        NULL
-    };
+        NULL};
 
-    for (int i = 0; _text[i] != NULL; i++) {
+    for (int i = 0; _text[i] != NULL; i++)
+    {
         printf("%s\n", _text[i]);
     }
 
@@ -185,25 +195,29 @@ void sys_entry(void) {
 
     // Interrupts initialization
     int gdt_error_count = 0;
-    if (gdt_init() != 0) {
+    if (gdt_init() != 0)
+    {
         ERROR("boot", "Failed to initialize GDT, unknown error.");
         gdt_error_count++;
     }
 
     INFO("boot", "Initialized GDT (%d errors reported)", gdt_error_count);
-    if (gdt_error_count > 0) {
+    if (gdt_error_count > 0)
+    {
         ERROR("boot", "Error(s) happened during initialization of the GDT. Halting.");
         hcf();
     }
 
     int idt_error_count = 0;
-    if (idt_init() != 0) {
+    if (idt_init() != 0)
+    {
         ERROR("boot", "Failed to initialize IDT, unknown error.");
         idt_error_count++;
     }
 
     INFO("boot", "Initialized IDT (%d errors reported)", idt_error_count);
-    if (idt_error_count > 0) {
+    if (idt_error_count > 0)
+    {
         ERROR("boot", "Error(s) happened during initialization of the IDT. Halting.");
         hcf();
     }
@@ -214,18 +228,21 @@ void sys_entry(void) {
 
     DEBUG("boot", "HHDM Offset: 0x%.16llx", hhdm_offset);
 
-    if (pmm_init(memmap_request.response) != 0) {
+    if (pmm_init(memmap_request.response) != 0)
+    {
         ERROR("boot", "Failed to initialize PMM, unknown error.");
         pmm_error_count++;
     }
 
-    if (test_pmm(_PMM_TESTS) != 0) {
+    if (test_pmm(_PMM_TESTS) != 0)
+    {
         ERROR("boot", "PMM tests failed, unknown error.");
         pmm_error_count++;
     }
 
     INFO("boot", "Initialized PMM (%d errors reported), %d tests ran", pmm_error_count, _PMM_TESTS);
-    if (pmm_error_count > 0) {
+    if (pmm_error_count > 0)
+    {
         ERROR("boot", "Errors during PMM initialization or tests. Halting.");
         hcf();
     }
@@ -235,13 +252,15 @@ void sys_entry(void) {
     __kernel_phys_base = kernel_address_request.response->physical_base;
     __kernel_virt_base = kernel_address_request.response->virtual_base;
 
-    if (vmm_init() != 0) {
+    if (vmm_init() != 0)
+    {
         ERROR("boot", "Failed to initialize VMM, unknown error.");
         vmm_error_count++;
     }
 
     vma_context_t *ctx = vma_create_context(kernel_pagemap);
-    if (ctx == NULL) {
+    if (ctx == NULL)
+    {
         ERROR("boot", "Failed to create VMA context for kernel.");
         vmm_error_count++;
     }
@@ -250,7 +269,8 @@ void sys_entry(void) {
     __kernel_vma_context = ctx;
 
     INFO("boot", "Initialized VMM (%d errors reported), %d tests ran", vmm_error_count, _VMM_TESTS);
-    if (vmm_error_count > 0) {
+    if (vmm_error_count > 0)
+    {
         ERROR("boot", "Errors during VMM initialization or tests. Halting.");
         hcf();
     }
@@ -258,28 +278,32 @@ void sys_entry(void) {
     // Filesystem initialization
     int vfs_error_count = 0;
 
-    if (vfs_init() != 0) {
+    if (vfs_init() != 0)
+    {
         ERROR("boot", "Failed to initialize VFS, unknown error.");
         vfs_error_count++;
     }
 
     usize ramfs_size = module_request.response->modules[0]->size;
     u8 *ramfs = (u8 *)module_request.response->modules[0]->address;
-    if (ramfs_init(ramfs, ramfs_size) != 0) {
+    if (ramfs_init(ramfs, ramfs_size) != 0)
+    {
         ERROR("boot", "Failed to initialize RAMFS, unknown error.");
         vfs_error_count++;
     }
 
     INFO("boot", "Initialized VFS (%d errors reported)", vfs_error_count);
-    if (vfs_error_count > 0) {
+    if (vfs_error_count > 0)
+    {
         ERROR("boot", "Errors during VFS initialization. Halting.");
         hcf();
     }
 
     INFO("boot", "Finished initializing Nekonix.");
 
-    FILE* test = open("/test", READ_WRITE);
-    if(test == NULL) {
+    FILE *test = open("/test", READ_WRITE);
+    if (test == NULL)
+    {
         ERROR("boot", "Failed to open /test.");
         hcf();
     }
@@ -296,4 +320,3 @@ void sys_entry(void) {
 
     hlt();
 }
-
