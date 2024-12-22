@@ -13,13 +13,22 @@
 extern int serial_putchar(char);
 extern int flanterm_putchar(char);
 
+static volatile u64 tick_count = 0;
+
 static void timer_interrupt_handler(int_frame_t *frame)
 {
-    scheduler_tick(frame);
+    tick_count++;
+    scheduler_context_switch(frame);
+    pic_send_end_of_interrupt(IRQ0); // Send End of Interrupt signal to PIC
 }
 
 void timer_init(int frequency)
 {
+    if (frequency < 18 || frequency > 1000)
+    {
+        frequency = 100; // Default to 100Hz if out of range
+    }
+
     u16 divisor = PIT_FREQUENCY / frequency;
 
     outb(PIT_COMMAND, 0x36);                    // Set PIT to Mode 3 (Square Wave Generator)
@@ -32,23 +41,45 @@ void timer_init(int frequency)
     idt_irq_register(IRQ0, timer_interrupt_handler);
 }
 
-void test_proc()
+u64 timer_get_ticks()
 {
-    proc_t *proc = scheduler_get_current_proc();
-    printf("Hello from process %d\n", proc->pid);
+    return tick_count;
+}
+
+void timer_sleep(u64 ticks)
+{
+    u64 start = timer_get_ticks();
+    while (timer_get_ticks() < start + ticks)
+    {
+        __asm__ volatile("hlt");
+    }
+}
+
+void procA()
+{
+    while (1)
+    {
+        flanterm_putchar('A');
+        // timer_sleep(10);
+    }
+}
+
+void procB()
+{
+    while (1)
+    {
+        serial_putchar('B');
+        // timer_sleep(10);
+    }
 }
 
 void test()
 {
-#ifdef _DEBUG
-    putchar_impl = serial_putchar;
-#endif // _DEBUG
+
     scheduler_init();
-    timer_init(100);
-    proc_spawn(test_proc);
-    proc_spawn(test_proc);
-    proc_spawn(test_proc);
-    proc_spawn(test_proc);
-    proc_spawn(test_proc);
-    __asm__ volatile("int $0x20"); // Kickstart the scheduler
+    timer_init(100); // Initialize timer at 100Hz
+    scheduler_create_process(procA);
+    scheduler_create_process(procB);
+
+    __asm__ volatile("int $0x20"); // Trigger the first scheduler interrupt manually
 }

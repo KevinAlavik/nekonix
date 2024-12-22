@@ -2,37 +2,47 @@
 #define SCHEDULER_H
 
 #include <mm/vmm.h>
-#include <mm/vma.h>
 #include <sys/idt.h>
-#include <boot/nnix.h>
 #include <lib/types.h>
+#include <boot/nnix.h>
 
 #define MAX_PROCESSES 256
 
+typedef enum
+{
+    PROCESS_NEW,
+    PROCESS_READY,
+    PROCESS_RUNNING,
+    PROCESS_BLOCKED,
+    PROCESS_TERMINATED
+} process_state_t;
+
 typedef struct
 {
-    u64 pid;
-    int_frame_t ctx;
-    void (*entry)(void);
-    bool exited;
-    u64 exit_code;
-    u64 *pagemap;
-    vma_context_t *vma_ctx;
-} proc_t;
+    u64 pid;               // Process ID
+    process_state_t state; // Current state of the process
+    u64 *pagemap;          // Process page map
+    u64 priority;          // Dynamic priority (higher value = higher priority)
+    u64 time_slice;        // Time slice (quantum) for round-robin scheduling
+    u64 elapsed_time;      // Elapsed time the process has been running
+    int_frame_t ctx;       // Process context (CPU state)
+} process_t;
 
-extern u64 pid;
-extern proc_t *current_proc;
-extern proc_t *proc_list[MAX_PROCESSES];
-extern u32 proc_count;
-extern u32 current_proc_idx;
+typedef struct
+{
+    process_t *processes[MAX_PROCESSES];
+    u32 process_count; // Number of processes in the system
+    u32 current_index; // Index of the currently running process
+    u64 tick_count;    // Global tick counter for time slice management
+} scheduler_t;
 
-void proc_remove(u32 index);
-void proc_exit(proc_t *proc, u64 exit_code);
-void proc_watchdog();
-void proc_watchdog_handler();
-int scheduler_init();
-void proc_spawn(void (*entry)(void));
-void scheduler_tick(int_frame_t *frame);
-proc_t *scheduler_get_current_proc();
+// Function prototypes
+void scheduler_init();
+u64 scheduler_create_process(void (*entry)(void));
+void scheduler_terminate_current_process(u64 exit_code);
+void scheduler_tick();
+void scheduler_context_switch(int_frame_t *frame);
+process_t *scheduler_get_current_process();
+void scheduler_idle();
 
 #endif // SCHEDULER_H
