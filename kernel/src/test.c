@@ -2,6 +2,7 @@
 #include <sys/idt.h>
 #include <sys/pic.h>
 #include <dev/serial.h>
+#include <sys/cpu.h>
 #include <proc/scheduler.h>
 
 #define PIT_CHANNEL_0 0x40
@@ -11,8 +12,10 @@
 
 extern int serial_putchar(char);
 extern int flanterm_putchar(char);
+
 static void timer_interrupt_handler(int_frame_t *frame)
 {
+    (void)frame;
     scheduler_tick(frame);
     // pic_send_end_of_interrupt(IRQ0);
 }
@@ -33,14 +36,21 @@ void timer_init(int frequency)
 
 void test_proc()
 {
-    printf("A");
+    proc_t *proc = scheduler_get_current_proc();
+    printf("Hello from process %d\n", proc->pid);
 }
 
 void test()
 {
+#ifdef _DEBUG
     putchar_impl = serial_putchar;
+#endif // _DEBUG
     scheduler_init();
     timer_init(100);
+    proc_spawn(test_proc);
+    proc_spawn(test_proc);
+    proc_spawn(test_proc);
+    proc_spawn(test_proc);
     proc_spawn(test_proc);
     __asm__ volatile("int $0x20"); // Kickstart the scheduler
 }

@@ -12,7 +12,7 @@
 typedef struct
 {
     u64 pid;
-    int_frame_t *ctx;
+    int_frame_t ctx;
     void (*entry)(void);
     bool exited;
     u64 exit_code;
