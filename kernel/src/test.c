@@ -15,9 +15,7 @@ extern int flanterm_putchar(char);
 
 static void timer_interrupt_handler(int_frame_t *frame)
 {
-    (void)frame;
     scheduler_tick(frame);
-    // pic_send_end_of_interrupt(IRQ0);
 }
 
 void timer_init(int frequency)
