@@ -1,4 +1,4 @@
-#include <core/gdt.h>
+#include <sys/gdt.h>
 #include <boot/nnix.h>
 
 gdtpr_t gdtpr;

@@ -1,6 +1,6 @@
 #include <dev/rtc.h>
 #include <boot/nnix.h>
-#include <core/cpu.h>
+#include <sys/cpu.h>
 #include <dev/serial.h>
 
 char bcd;

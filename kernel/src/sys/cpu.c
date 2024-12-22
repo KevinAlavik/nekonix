@@ -1,4 +1,4 @@
-#include <core/cpu.h>
+#include <sys/cpu.h>
 
 void hlt()
 {

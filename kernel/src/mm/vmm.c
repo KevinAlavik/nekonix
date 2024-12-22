@@ -96,14 +96,17 @@ void vmm_unmap(u64 *pagemap, u64 virt)
     __asm__ volatile("invlpg (%0)" : : "r"(virt) : "memory");
 }
 
-u64 *vmm_new_pagemap(u64 *kernel_pagemap)
+u64 *vmm_new_pagemap()
 {
     u64 *pagemap = (u64 *)HIGHER_HALF(pmm_request_page());
+    memset(pagemap, 0, PAGE_SIZE);
     for (u64 i = 256; i < 512; i++)
     {
         pagemap[i] = kernel_pagemap[i];
+        DEBUG("vmm", "Copied kernel pagemap entry %d to new pagemap. (kernel pagemap: 0x%.16llx)", i, (u64)kernel_pagemap);
     }
 
+    DEBUG("vmm", "Created new pagemap at 0x%.16llx", (u64)pagemap);
     return pagemap;
 }
 
@@ -134,7 +137,7 @@ int vmm_init()
         vmm_map(kernel_pagemap, text, text - __kernel_virt_base + __kernel_phys_base, VMM_PRESENT);
     }
     INFO("vmm", "Mapped .text region.");
-    
+
     for (uptr rodata = ALIGN_DOWN(__rodata_start, PAGE_SIZE); rodata < ALIGN_UP(__rodata_end, PAGE_SIZE); rodata += PAGE_SIZE)
     {
         vmm_map(kernel_pagemap, rodata, rodata - __kernel_virt_base + __kernel_phys_base, VMM_PRESENT | VMM_NX);

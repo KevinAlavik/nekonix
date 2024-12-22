@@ -1,13 +1,13 @@
 #include <boot/limine.h>
 #include <dev/serial_util.h>
-#include <core/cpu.h>
+#include <sys/cpu.h>
 #include <lib/stdio.h>
 #include <boot/nnix.h>
 #include <stdbool.h>
 #include <flanterm/flanterm.h>
 #include <flanterm/backends/fb.h>
-#include <core/gdt.h>
-#include <core/idt.h>
+#include <sys/gdt.h>
+#include <sys/idt.h>
 #include <mm/pmm.h>
 #include <lib/string.h>
 #include <mm/vmm.h>
@@ -123,6 +123,7 @@ int test_vmm(int tests, vma_context_t *ctx)
 }
 
 // Kernel entry point.
+extern void test();
 void sys_entry(void)
 {
     // Serial output setup
@@ -170,7 +171,7 @@ void sys_entry(void)
         ft_ctx->full_refresh(ft_ctx);
     }
 
-    putchar_impl = flanterm_putchar;
+    putchar_impl = serial_putchar;
 
     // Time initialization
     rtc_init();
@@ -300,23 +301,7 @@ void sys_entry(void)
     }
 
     INFO("boot", "Finished initializing Nekonix.");
-
-    FILE *test = open("/test", READ_WRITE);
-    if (test == NULL)
-    {
-        ERROR("boot", "Failed to open /test.");
-        hcf();
-    }
-
-    write(test, "Hello, World!\n", 14);
-
-    char buffer[256];
-    read(test, buffer, sizeof(buffer));
-    close(test);
-
-    printf("%s", buffer);
-
-    LS("/");
+    test();
 
     hlt();
 }

@@ -1,7 +1,8 @@
-#include <core/idt.h>
+#include <sys/idt.h>
 #include <boot/nnix.h>
-#include <core/cpu.h>
+#include <sys/cpu.h>
 #include <mm/pmm.h>
+#include <proc/scheduler.h>
 
 idt_entry_t idt_entries[IDT_ENTRY_COUNT];
 idt_pointer_t idt_pointer;
@@ -84,6 +85,7 @@ int idt_init()
     }
 
     idt_load((u64)&idt_pointer);
+
     _panicked = false;
     DEBUG("interrupt", "IDT loaded with base=0x%lx, limit=%u", idt_pointer.base, idt_pointer.limit);
     return 0;
@@ -129,6 +131,13 @@ void idt_handler(int_frame_t frame)
     if (frame.vector < 32) // Check for exceptions
     {
         DEBUG("interrupt", "Received exception %d (%s): %s", frame.vector, exception_info[frame.vector].mnemonic, exception_info[frame.vector].message);
+
+        if (frame.vector == 1)
+        {
+            DEBUG("interrupt", "Received debug exception, ticking scheduler.");
+            scheduler_tick(&frame);
+            // hcf();
+        }
 
         if (exception_info[frame.vector].fatal)
         {
@@ -243,6 +252,7 @@ void idt_handler(int_frame_t frame)
         {
             DEBUG("interrupt", "Invoking handler for IRQ %d", irq);
             irq_handlers[irq](&frame);
+            // pic_eoi(irq);
             DEBUG("interrupt", "Executed IRQ handler for IRQ %d", irq);
         }
         else
