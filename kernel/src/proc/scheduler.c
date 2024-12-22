@@ -39,6 +39,7 @@ void proc_exit(proc_t *proc, u64 exit_code)
 
 void proc_watchdog()
 {
+    DEBUG("proc", "Watchdog started");
     proc_t *proc = current_proc;
     vmm_switch_pagemap(proc->pagemap);
     proc->entry();
@@ -74,11 +75,12 @@ void proc_watchdog_handler()
     }
 }
 
-void scheduler_initialize()
+int scheduler_init()
 {
     proc_count = 0;
     current_proc_idx = 0;
     proc_spawn(proc_watchdog_handler);
+    return 0;
 }
 
 void proc_spawn(void (*entry)(void))

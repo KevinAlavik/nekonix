@@ -171,7 +171,7 @@ void sys_entry(void)
         ft_ctx->full_refresh(ft_ctx);
     }
 
-    putchar_impl = serial_putchar;
+    putchar_impl = flanterm_putchar;
 
     // Time initialization
     rtc_init();

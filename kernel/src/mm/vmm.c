@@ -99,11 +99,16 @@ void vmm_unmap(u64 *pagemap, u64 virt)
 u64 *vmm_new_pagemap()
 {
     u64 *pagemap = (u64 *)HIGHER_HALF(pmm_request_page());
+    if (pagemap == NULL)
+    {
+        ERROR("vmm", "Failed to allocate page for new pagemap.");
+        return NULL;
+    }
     memset(pagemap, 0, PAGE_SIZE);
     for (u64 i = 256; i < 512; i++)
     {
         pagemap[i] = kernel_pagemap[i];
-        DEBUG("vmm", "Copied kernel pagemap entry %d to new pagemap. (kernel pagemap: 0x%.16llx)", i, (u64)kernel_pagemap);
+        // DEBUG("vmm", "Copied kernel pagemap entry %d to new pagemap. (kernel pagemap: 0x%.16llx)", i, (u64)kernel_pagemap);
     }
 
     DEBUG("vmm", "Created new pagemap at 0x%.16llx", (u64)pagemap);

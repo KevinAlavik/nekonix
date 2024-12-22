@@ -5,6 +5,7 @@
 #include <mm/vma.h>
 #include <sys/idt.h>
 #include <boot/nnix.h>
+#include <lib/types.h>
 
 #define MAX_PROCESSES 256
 
@@ -29,7 +30,7 @@ void proc_remove(u32 index);
 void proc_exit(proc_t *proc, u64 exit_code);
 void proc_watchdog();
 void proc_watchdog_handler();
-void scheduler_initialize();
+int scheduler_init();
 void proc_spawn(void (*entry)(void));
 void scheduler_tick(int_frame_t *frame);
 proc_t *scheduler_get_current_proc();

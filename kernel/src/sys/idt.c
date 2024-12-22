@@ -3,6 +3,7 @@
 #include <sys/cpu.h>
 #include <mm/pmm.h>
 #include <proc/scheduler.h>
+#include <sys/pic.h>
 
 idt_entry_t idt_entries[IDT_ENTRY_COUNT];
 idt_pointer_t idt_pointer;
@@ -84,7 +85,9 @@ int idt_init()
         idt_set_gate(idt_entries, i, isr_table[i], 0x08, 0x8E);
     }
 
+    pic_disable();
     idt_load((u64)&idt_pointer);
+    pic_enable();
 
     _panicked = false;
     DEBUG("interrupt", "IDT loaded with base=0x%lx, limit=%u", idt_pointer.base, idt_pointer.limit);
@@ -134,9 +137,8 @@ void idt_handler(int_frame_t frame)
 
         if (frame.vector == 1)
         {
-            DEBUG("interrupt", "Received debug exception, ticking scheduler.");
-            scheduler_tick(&frame);
-            // hcf();
+            DEBUG("interrupt", "DEBUG @ 0x%p", frame.rip);
+            hcf();
         }
 
         if (exception_info[frame.vector].fatal)
@@ -247,18 +249,19 @@ void idt_handler(int_frame_t frame)
     else if (frame.vector >= IRQ_BASE && frame.vector < IRQ_BASE + IRQ_COUNT)
     {
         int irq = frame.vector - IRQ_BASE;
-        DEBUG("interrupt", "Received IRQ %d", irq);
+        // DEBUG("interrupt", "Received IRQ %d", irq);
         if (irq_handlers[irq])
         {
-            DEBUG("interrupt", "Invoking handler for IRQ %d", irq);
+            // DEBUG("interrupt", "Invoking handler for IRQ %d", irq);
             irq_handlers[irq](&frame);
-            // pic_eoi(irq);
-            DEBUG("interrupt", "Executed IRQ handler for IRQ %d", irq);
+            // DEBUG("interrupt", "Executed IRQ handler for IRQ %d", irq);
         }
         else
         {
             WARN("interrupt", "No handler registered for IRQ %d, interrupt ignored", irq);
         }
+
+        pic_send_end_of_interrupt(irq);
     }
     else if (frame.vector == 0x80) // System call
     {
