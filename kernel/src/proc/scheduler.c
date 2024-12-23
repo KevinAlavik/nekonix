@@ -6,12 +6,12 @@
 static scheduler_t scheduler;
 static u64 pid_counter = 0;
 
-static process_t *process_create(void (*entry)(void))
+static process_t *process_create(u64 entry)
 {
     process_t *proc = (process_t *)HIGHER_HALF(pmm_request_page());
     proc->pid = pid_counter++;
     proc->state = PROCESS_NEW;
-    proc->ctx.rip = (u64)entry;
+    proc->ctx.rip = entry;
     proc->ctx.rsp = (u64)HIGHER_HALF(pmm_request_page()) + 4095;
     proc->ctx.cs = 0x08;
     proc->ctx.ss = 0x10;
@@ -41,7 +41,7 @@ u64 scheduler_create_process(void (*entry)(void))
     {
         return -1; // Max process limit reached
     }
-    process_t *proc = process_create(entry);
+    process_t *proc = process_create((u64)entry);
     scheduler.processes[scheduler.process_count++] = proc;
     return proc->pid;
 }

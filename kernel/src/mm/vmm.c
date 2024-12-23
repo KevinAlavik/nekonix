@@ -165,37 +165,6 @@ void vmm_switch_pagemap(u64 *new_pagemap)
 
 void vmm_destroy_pagemap(u64 *pagemap)
 {
-    for (u64 i = 0; i < 512; i++)
-    {
-        if (pagemap[i] & 1)
-        {
-            u64 *pml3_table = (u64 *)HIGHER_HALF(pagemap[i] & 0x000FFFFFFFFFF000);
-            for (u64 j = 0; j < 512; j++)
-            {
-                if (pml3_table[j] & 1)
-                {
-                    u64 *pml2_table = (u64 *)HIGHER_HALF(pml3_table[j] & 0x000FFFFFFFFFF000);
-                    for (u64 k = 0; k < 512; k++)
-                    {
-                        if (pml2_table[k] & 1)
-                        {
-                            u64 *pml1_table = (u64 *)HIGHER_HALF(pml2_table[k] & 0x000FFFFFFFFFF000);
-                            for (u64 l = 0; l < 512; l++)
-                            {
-                                if (pml1_table[l] & 1)
-                                {
-                                    pmm_free_page((void *)(pml1_table[l] & 0x000FFFFFFFFFF000));
-                                }
-                            }
-                            pmm_free_page((void *)pml1_table);
-                        }
-                    }
-                    pmm_free_page((void *)pml2_table);
-                }
-            }
-            pmm_free_page((void *)pml3_table);
-        }
-    }
     pmm_free_page((void *)pagemap);
 }
 
