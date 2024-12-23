@@ -60,7 +60,7 @@ void procA()
     while (1)
     {
         flanterm_putchar('A');
-        // timer_sleep(10);
+        timer_sleep(5);
     }
 }
 
@@ -69,7 +69,7 @@ void procB()
     while (1)
     {
         serial_putchar('B');
-        // timer_sleep(10);
+        timer_sleep(5);
     }
 }
 
