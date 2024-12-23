@@ -11,9 +11,6 @@ static process_t *process_create(void (*entry)(void))
     process_t *proc = (process_t *)HIGHER_HALF(pmm_request_page());
     proc->pid = pid_counter++;
     proc->state = PROCESS_NEW;
-    proc->priority = 0;     // Default priority
-    proc->time_slice = 100; // Default time slice (quantum)
-    proc->elapsed_time = 0;
     proc->ctx.rip = (u64)entry;
     proc->ctx.rsp = (u64)HIGHER_HALF(pmm_request_page()) + 4095;
     proc->ctx.cs = 0x08;
@@ -47,26 +44,6 @@ u64 scheduler_create_process(void (*entry)(void))
     process_t *proc = process_create(entry);
     scheduler.processes[scheduler.process_count++] = proc;
     return proc->pid;
-}
-
-void scheduler_tick()
-{
-    scheduler.tick_count++;
-
-    process_t *current_process = scheduler.processes[scheduler.current_index];
-
-    if (current_process->state == PROCESS_RUNNING)
-    {
-        current_process->elapsed_time++;
-    }
-
-    if (current_process->elapsed_time >= current_process->time_slice)
-    {
-        current_process->state = PROCESS_READY;
-        scheduler.current_index = (scheduler.current_index + 1) % scheduler.process_count;
-        scheduler.processes[scheduler.current_index]->state = PROCESS_RUNNING;
-        current_process->elapsed_time = 0;
-    }
 }
 
 void scheduler_context_switch(int_frame_t *frame)
@@ -104,8 +81,7 @@ void scheduler_terminate_current_process(u64 exit_code)
     }
 
     current_process->state = PROCESS_TERMINATED;
-    (void)exit_code; // Unused for now
-    // current_process->exit_code = exit_code;
+    INFO("scheduler", "Process %d terminated with exit code %d", current_process->pid, exit_code);
 
     process_destroy(current_process);
 

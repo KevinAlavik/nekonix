@@ -77,9 +77,9 @@ void test()
 {
 
     scheduler_init();
-    timer_init(100); // Initialize timer at 100Hz
+    timer_init(100);
     scheduler_create_process(procA);
     scheduler_create_process(procB);
 
-    __asm__ volatile("int $0x20"); // Trigger the first scheduler interrupt manually
+    __asm__ volatile("int $0x20");
 }

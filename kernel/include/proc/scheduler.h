@@ -11,9 +11,7 @@
 typedef enum
 {
     PROCESS_NEW,
-    PROCESS_READY,
     PROCESS_RUNNING,
-    PROCESS_BLOCKED,
     PROCESS_TERMINATED
 } process_state_t;
 
@@ -22,9 +20,6 @@ typedef struct
     u64 pid;               // Process ID
     process_state_t state; // Current state of the process
     u64 *pagemap;          // Process page map
-    u64 priority;          // Dynamic priority (higher value = higher priority)
-    u64 time_slice;        // Time slice (quantum) for round-robin scheduling
-    u64 elapsed_time;      // Elapsed time the process has been running
     int_frame_t ctx;       // Process context (CPU state)
 } process_t;
 
