@@ -1,6 +1,7 @@
 MAKEFLAGS += -rR
 .SUFFIXES:
 
+TOOLCHAIN_PREFIX ?=
 
 VERSION_MAJOR   := 1
 VERSION_MINOR   := 1
@@ -12,7 +13,7 @@ override USER_VARIABLE = $(if $(filter $(origin $(1)),default undefined),$(eval 
 
 $(call USER_VARIABLE,DESTDIR,)
 $(call USER_VARIABLE,PREFIX,/usr/local)
-$(call USER_VARIABLE,CC,cc)
+$(call USER_VARIABLE,CC,gcc)
 $(call USER_VARIABLE,AR,ar)
 $(call USER_VARIABLE,LD,ld)
 $(call USER_VARIABLE,CFLAGS,-g -O2 -pipe)
@@ -27,7 +28,7 @@ ifneq ($(shell ( test '$(MAKECMDGOALS)' = clean || test '$(MAKECMDGOALS)' = dist
 endif
 
 
-override CC_IS_CLANG := $(shell ! $(CC) --version 2>/dev/null | grep 'clang' >/dev/null 2>&1; echo $$?)
+override CC_IS_CLANG := $(shell ! $(TOOLCHAIN_PREFIX)$(CC) --version 2>/dev/null | grep 'clang' >/dev/null 2>&1; echo $$?)
 
 ifeq ($(CC_IS_CLANG),1)
     override CC += \
@@ -96,24 +97,24 @@ cc-runtime-x86_64/cc-runtime.a: cc-runtime/*
 	rm -rf cc-runtime-x86_64
 	cp -r cc-runtime cc-runtime-x86_64
 	$(MAKE) -C cc-runtime-x86_64 -f cc-runtime.mk \
-		CC="$(CC)" \
-		AR="$(AR)" \
+		CC="$(TOOLCHAIN_PREFIX)$(CC)" \
+		AR="$(TOOLCHAIN_PREFIX)$(AR)" \
 		CFLAGS="$(CFLAGS)" \
 		CPPFLAGS='-isystem ../freestnd-c-hdrs-0bsd -DCC_RUNTIME_NO_FLOAT'
 
 bin/$(OUTPUT): GNUmakefile linker.ld $(OBJ) cc-runtime-x86_64/cc-runtime.a
 	mkdir -p "$$(dirname $@)"
-	$(LD) $(OBJ) cc-runtime-x86_64/cc-runtime.a $(LDFLAGS) -o $@
+	$(TOOLCHAIN_PREFIX)$(LD) $(OBJ) cc-runtime-x86_64/cc-runtime.a $(LDFLAGS) -o $@
 
 -include $(HEADER_DEPS)
 
 obj/%.c.o: src/%.c GNUmakefile
 	mkdir -p "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CONFIG_FLAGS) -c $< -o $@
+	$(TOOLCHAIN_PREFIX)$(CC) $(CFLAGS) $(CPPFLAGS) $(CONFIG_FLAGS) -c $< -o $@
 
 obj/%.S.o: src/%.S GNUmakefile
 	mkdir -p "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CONFIG_FLAGS) -c $< -o $@
+	$(TOOLCHAIN_PREFIX)$(CC) $(CFLAGS) $(CPPFLAGS) $(CONFIG_FLAGS) -c $< -o $@
 
 obj/%.asm.o: src/%.asm GNUmakefile
 	mkdir -p "$$(dirname $@)"

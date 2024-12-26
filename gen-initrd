@@ -7,7 +7,7 @@ set -e
 
 if [[ -d "$INITRD" ]]; then
     rm -rf $OUT
-    tar -cvf "$OUT" --format=ustar -C "$INITRD" .
+    tar -cvf "$OUT" -C "$INITRD" .
 else
     exit 1
 fi
