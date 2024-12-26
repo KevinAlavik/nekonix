@@ -41,6 +41,7 @@ override CFLAGS += \
     -Wall \
     -Wextra \
     -Werror \
+    -Wno-unknown-warning-option \
     -std=gnu11 \
     -nostdinc \
     -ffreestanding \
