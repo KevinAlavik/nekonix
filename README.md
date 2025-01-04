@@ -1,4 +1,6 @@
 # Nekonix (Nnix.)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/KevinAlavik/nekonix)
+![GitHub last commit](https://img.shields.io/github/last-commit/KevinAlavik/nekonix)
 
 > [!NOTE]
 > Nekonix (Nnix.) is a hobby project and not meant to run in production environments.
