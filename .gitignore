@@ -13,3 +13,5 @@ initrd.img
 /initrd/boot/nnix-*
 /.vscode
 /.cache
+/test/bin
+/test/build

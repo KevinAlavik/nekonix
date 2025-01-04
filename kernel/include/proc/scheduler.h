@@ -21,6 +21,7 @@ typedef struct
     process_state_t state; // Current state of the process
     u64 *pagemap;          // Process page map
     int_frame_t ctx;       // Process context (CPU state)
+    const char *name;      // Process name
 } process_t;
 
 typedef struct
@@ -33,7 +34,8 @@ typedef struct
 
 // Function prototypes
 void scheduler_init();
-u64 scheduler_create_process(void (*entry)(void));
+u64 scheduler_create_process(void (*entry)(void), const char *name);
+u64 scheduler_create_elf_process(u8 *data, const char *name);
 void scheduler_terminate_current_process(u64 exit_code);
 void scheduler_tick();
 void scheduler_context_switch(int_frame_t *frame);

@@ -4,14 +4,14 @@
 #include <dev/serial.h>
 #include <sys/cpu.h>
 #include <proc/scheduler.h>
+#include <dev/hvfs.h>
+
+// TODO: Move out of TEST
 
 #define PIT_CHANNEL_0 0x40
 #define PIT_COMMAND 0x43
 #define PIT_FREQUENCY 1193182
 #define IRQ0 0
-
-extern int serial_putchar(char);
-extern int flanterm_putchar(char);
 
 static volatile u64 tick_count = 0;
 
@@ -60,7 +60,7 @@ void procA()
     while (1)
     {
         flanterm_putchar('A');
-        timer_sleep(5);
+        timer_sleep(2);
     }
 }
 
@@ -69,7 +69,7 @@ void procB()
     while (1)
     {
         serial_putchar('B');
-        timer_sleep(5);
+        timer_sleep(2);
     }
 }
 
@@ -78,8 +78,19 @@ void test()
 
     scheduler_init();
     timer_init(100);
-    scheduler_create_process(procA);
-    scheduler_create_process(procB);
+    // scheduler_create_process(procA);
+    // scheduler_create_process(procB);
 
-    __asm__ volatile("int $0x20");
+    FILE *init = open("/bin/init", READ_ONLY);
+    if (init == NULL)
+    {
+        ERROR("test", "Failed to open /bin/init");
+        return;
+    }
+
+    u8 *data = kmalloc(init->vnode->size);
+    read(init, data, init->vnode->size);
+    scheduler_create_elf_process(data, "init");
+
+    close(init);
 }

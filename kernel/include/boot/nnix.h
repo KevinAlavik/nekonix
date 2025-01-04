@@ -47,9 +47,9 @@
 #endif // _LA_LOGS
 
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
 extern u64 hhdm_offset;
-
 extern char __limine_requests_start[];
 extern char __limine_requests_end[];
 extern char __text_start[];
@@ -58,13 +58,13 @@ extern char __rodata_start[];
 extern char __rodata_end[];
 extern char __data_start[];
 extern char __data_end[];
-
 extern u64 __kernel_phys_base;
 extern u64 __kernel_virt_base;
-
 extern void *__kernel_vma_context;
-
 extern struct flanterm_context *ft_ctx;
+extern struct limine_framebuffer *__kernel_framebuffer;
+extern int flanterm_putchar(char);
+extern int serial_putchar(char);
 
 #define LS(path) vfs_debug_ls(vfs_lookup(path))
 

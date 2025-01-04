@@ -8,6 +8,8 @@ GENERIC_QEMUFLAGS += -serial stdio
 
 QEMUFLAGS ?= 
 
+SYSROOT ?= sysroot
+
 override IMAGE_NAME := Nekonix
 
 .PHONY: all
@@ -72,6 +74,10 @@ kernel-deps:
 kernel: kernel-deps
 	$(MAKE) -C kernel
 
+.PHONY: sysroot
+sysroot: sysroot
+	$(SYSROOT)/build.sh
+
 .PHONY: initrd
 initrd: initrd
 	mkdir -p initrd/boot
@@ -79,7 +85,7 @@ initrd: initrd
 	ln limine.conf initrd/boot/limine.conf
 	./gen-initrd
 
-$(IMAGE_NAME).iso: limine/limine kernel initrd
+$(IMAGE_NAME).iso: limine/limine kernel sysroot initrd 
 	rm -rf iso_root
 	mkdir -p iso_root/boot
 	cp -v kernel/bin/* iso_root/boot/

@@ -2,21 +2,39 @@
 #include <lib/string.h>
 #include <mm/pmm.h>
 #include <mm/vmm.h>
+#include <proc/elf.h>
 
 static scheduler_t scheduler;
 static u64 pid_counter = 0;
 
-static process_t *process_create(u64 entry)
+static process_t *process_create(u64 entry, u64 *pagemap, const char *name)
 {
     process_t *proc = (process_t *)HIGHER_HALF(pmm_request_page());
+    if (!proc)
+    {
+        ERROR("scheduler", "Failed to allocate process structure");
+        return NULL;
+    }
+
     proc->pid = pid_counter++;
     proc->state = PROCESS_NEW;
     proc->ctx.rip = entry;
     proc->ctx.rsp = (u64)HIGHER_HALF(pmm_request_page()) + 4095;
+
+    if (!proc->ctx.rsp)
+    {
+        ERROR("scheduler", "Failed to allocate stack for process %llu", proc->pid);
+        pmm_free_page((void *)proc);
+        return NULL;
+    }
+
     proc->ctx.cs = 0x08;
     proc->ctx.ss = 0x10;
     proc->ctx.rflags = 0x202;
-    proc->pagemap = vmm_new_pagemap();
+    proc->pagemap = pagemap;
+    proc->name = name;
+
+    DEBUG("scheduler", "Process %llu created with entry 0x%lx", proc->pid, entry);
     return proc;
 }
 
@@ -35,13 +53,33 @@ void scheduler_init()
     scheduler.tick_count = 0;
 }
 
-u64 scheduler_create_process(void (*entry)(void))
+u64 scheduler_create_process(void (*entry)(void), const char *name)
 {
     if (scheduler.process_count >= MAX_PROCESSES)
     {
         return -1; // Max process limit reached
     }
-    process_t *proc = process_create((u64)entry);
+    process_t *proc = process_create((u64)entry, vmm_new_pagemap(), name);
+    scheduler.processes[scheduler.process_count++] = proc;
+    return proc->pid;
+}
+
+u64 scheduler_create_elf_process(u8 *data, const char *name)
+{
+    if (scheduler.process_count >= MAX_PROCESSES)
+    {
+        return -1; // Max process limit reached
+    }
+
+    u64 *pagemap = vmm_new_pagemap();
+    u64 entry = elf_load(data, pagemap);
+    if (entry == 0)
+    {
+        ERROR("scheduler", "Failed to load ELF, dropping proc.");
+        return 0;
+    }
+
+    process_t *proc = process_create(entry, pagemap, name);
     scheduler.processes[scheduler.process_count++] = proc;
     return proc->pid;
 }
@@ -81,7 +119,7 @@ void scheduler_terminate_current_process(u64 exit_code)
     }
 
     current_process->state = PROCESS_TERMINATED;
-    INFO("scheduler", "Process %d terminated with exit code %d", current_process->pid, exit_code);
+    INFO("scheduler", "Process %d (%s) terminated with exit code %d", current_process->pid, current_process->name, exit_code);
 
     process_destroy(current_process);
 

@@ -6,11 +6,11 @@ gdt_entry_t gdtEntries[5];
 
 int gdt_init()
 {
-    gdtEntries[0] = (gdt_entry_t){0, 0, 0, 0, 0, 0};
-    gdtEntries[1] = (gdt_entry_t){0, 0, 0, 0b10011010, 0b10100000, 0};
-    gdtEntries[2] = (gdt_entry_t){0, 0, 0, 0b10010010, 0b10100000, 0};
-    gdtEntries[3] = (gdt_entry_t){0, 0, 0, 0b11111010, 0b10100000, 0};
-    gdtEntries[4] = (gdt_entry_t){0, 0, 0, 0b11110010, 0b10100000, 0};
+    gdtEntries[0] = (gdt_entry_t){0, 0, 0, 0x00, 0x00, 0};
+    gdtEntries[1] = (gdt_entry_t){0, 0, 0, 0x9A, 0xA0, 0};
+    gdtEntries[2] = (gdt_entry_t){0, 0, 0, 0x92, 0xA0, 0};
+    gdtEntries[3] = (gdt_entry_t){0, 0, 0, 0xFA, 0xA0, 0};
+    gdtEntries[4] = (gdt_entry_t){0, 0, 0, 0xF2, 0xA0, 0};
 
     gdtpr.limit = (u16)(sizeof(gdtEntries) - 1);
     gdtpr.base = (uptr)&gdtEntries;

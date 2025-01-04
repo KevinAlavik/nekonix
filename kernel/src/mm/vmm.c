@@ -154,11 +154,6 @@ u64 *vmm_new_pagemap()
 
 void vmm_switch_pagemap(u64 *new_pagemap)
 {
-    if (!pagemap_is_valid(new_pagemap))
-    {
-        ERROR("vmm", "Invalid pagemap.");
-        return;
-    }
 
     __asm__ volatile("movq %0, %%cr3" ::"r"(PHYSICAL((u64)new_pagemap)));
 }

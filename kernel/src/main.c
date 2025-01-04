@@ -17,6 +17,7 @@
 #include <fs/ramfs.h>
 #include <dev/rtc.h>
 #include <dev/hvfs.h>
+#include <lib/seif.h>
 
 #define _PMM_TESTS 10
 #define _VMM_TESTS 10
@@ -51,6 +52,7 @@ __attribute__((used, section(".limine_requests"))) static volatile struct limine
 __attribute__((used, section(".limine_requests_end"))) static volatile LIMINE_REQUESTS_END_MARKER;
 
 struct flanterm_context *ft_ctx;
+struct limine_framebuffer *__kernel_framebuffer;
 
 // Output callbacks.
 int serial_putchar(char c)
@@ -66,6 +68,13 @@ int serial_putchar(char c)
 int flanterm_putchar(char c)
 {
     flanterm_write(ft_ctx, &c, 1);
+    return c;
+}
+
+int mirror_putchar(char c)
+{
+    serial_putchar(c);
+    flanterm_putchar(c);
     return c;
 }
 
@@ -122,6 +131,97 @@ int test_vmm(int tests, vma_context_t *ctx)
     return 0;
 }
 
+void putpixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b)
+{
+    struct limine_framebuffer *fb = __kernel_framebuffer;
+    if (x >= fb->width || y >= fb->height)
+    {
+        return;
+    }
+
+    uint32_t *pixel_addr = (uint32_t *)(fb->address + y * fb->pitch + x * (fb->bpp / 8));
+    uint32_t color = 0xFF000000 | (r << 16) | (g << 8) | b;
+    *pixel_addr = color;
+}
+
+void draw_image(uint8_t *image)
+{
+    SEIF_Header *header = (SEIF_Header *)image;
+    if (header->magic[0] != 'S' || header->magic[1] != 'E' || header->magic[2] != 'I' || header->magic[3] != 'F')
+    {
+        ERROR("seif", "Invalid SEIF header.");
+        return;
+    }
+
+    uint8_t encoding_size = 0;
+    switch (header->encoding)
+    {
+    case SEIF_ENCODING_RGB:
+        encoding_size = 3;
+        break;
+    case SEIF_ENCODING_RGBA:
+    case SEIF_ENCODING_ARGB:
+        encoding_size = 4;
+        break;
+    default:
+        ERROR("seif", "Unknown encoding type.");
+        return;
+    }
+
+    SEIF_ChunkHeader *chunk_header = (SEIF_ChunkHeader *)(image + sizeof(SEIF_Header));
+    if (header->chunk_count != 1 ||
+        chunk_header->width != header->meta.width ||
+        chunk_header->height != header->meta.height)
+    {
+        ERROR("seif", "Invalid SEIF chunk header.");
+        return;
+    }
+
+    uint8_t *data = (uint8_t *)(image + sizeof(SEIF_Header) + sizeof(SEIF_ChunkHeader));
+
+    for (u32 y = 0; y < header->meta.height; y++)
+    {
+        for (u32 x = 0; x < header->meta.width; x++)
+        {
+            u32 index = (y * header->meta.width + x) * encoding_size;
+            uint8_t r = 0, g = 0, b = 0, a = 255;
+
+            if (index + encoding_size <= header->meta.width * header->meta.height * encoding_size)
+            {
+                switch (header->encoding)
+                {
+                case SEIF_ENCODING_RGB:
+                    r = data[index];
+                    g = data[index + 1];
+                    b = data[index + 2];
+                    break;
+
+                case SEIF_ENCODING_RGBA:
+                    r = data[index];
+                    g = data[index + 1];
+                    b = data[index + 2];
+                    a = data[index + 3];
+                    break;
+
+                case SEIF_ENCODING_ARGB:
+                    a = data[index];
+                    r = data[index + 1];
+                    g = data[index + 2];
+                    b = data[index + 3];
+                    break;
+                }
+                (void)a;
+                putpixel(x, y, r, g, b);
+            }
+            else
+            {
+                ERROR("seif", "Pixel data index out of bounds.");
+                return;
+            }
+        }
+    }
+}
+
 // Kernel entry point.
 extern void test();
 void sys_entry(void)
@@ -151,6 +251,8 @@ void sys_entry(void)
         WARN("boot", "No framebuffers available.");
         hcf();
     }
+
+    __kernel_framebuffer = framebuffer;
 
     ft_ctx = flanterm_fb_init(
         NULL, NULL,
@@ -300,8 +402,9 @@ void sys_entry(void)
         hcf();
     }
 
-    INFO("boot", "Finished initializing Nekonix.");
     test();
+    __asm__ volatile("int $0x20");
+    INFO("boot", "Finished initializing Nekonix.");
 
     hlt();
 }

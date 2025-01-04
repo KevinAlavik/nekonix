@@ -4,6 +4,7 @@
 #include <mm/pmm.h>
 #include <proc/scheduler.h>
 #include <sys/pic.h>
+#include <sys/syscall.h>
 
 idt_entry_t idt_entries[IDT_ENTRY_COUNT];
 idt_pointer_t idt_pointer;
@@ -85,6 +86,8 @@ int idt_init()
         idt_set_gate(idt_entries, i, isr_table[i], 0x08, 0x8E);
     }
 
+    idt_set_gate(idt_entries, 0x80, isr_table[0x80], 0x08, 0xEE);
+
     pic_disable();
     idt_load((u64)&idt_pointer);
     pic_enable();
@@ -133,12 +136,14 @@ void idt_handler(int_frame_t frame)
 {
     if (frame.vector < 32) // Check for exceptions
     {
-        DEBUG("interrupt", "Received exception %d (%s): %s", frame.vector, exception_info[frame.vector].mnemonic, exception_info[frame.vector].message);
+        DEBUG("interrupt", "Received exception %d (%s) on proc %s, %s", frame.vector, exception_info[frame.vector].mnemonic, scheduler_get_current_process()->name, exception_info[frame.vector].message);
 
         if (frame.vector == 1)
         {
-            DEBUG("interrupt", "DEBUG @ 0x%p", frame.rip);
+            DEBUG("interrupt", "DEBUG @ 0x%.16llx", frame.rip);
+#if _DEBUG
             hcf();
+#endif // _DEBUG
         }
 
         if (exception_info[frame.vector].fatal)
@@ -265,7 +270,8 @@ void idt_handler(int_frame_t frame)
     }
     else if (frame.vector == 0x80) // System call
     {
-        WARN("interrupt", "Received system call interrupt, processing skipped");
+        DEBUG("interrupt", "Received system call from proc %s", scheduler_get_current_process()->name);
+        frame.rax = syscall_handler(&frame);
     }
     else // Unknown interrupt
     {

@@ -79,7 +79,7 @@ int ramfs_parse(struct vnode *parent)
 
         if (strlen(name) == 0 || strcmp(name, ".") == 0)
         {
-            DEBUG("ramfs", "Skipping entry with empty name or current directory '.'.");
+            DEBUG("ramfs", "Skipping entry with empty name or current directory '.'");
             offset += USTAR_HEADER_SIZE + ((file_size + 511) & ~511);
             continue;
         }
@@ -105,6 +105,7 @@ int ramfs_parse(struct vnode *parent)
                     permissions |= (mode & TOREAD) ? VNODE_PERMS_OTHERS_READ : 0;
                     permissions |= (mode & TOWRITE) ? VNODE_PERMS_OTHERS_WRITE : 0;
                     permissions |= (mode & TOEXEC) ? VNODE_PERMS_OTHERS_EXECUTE : 0;
+
                     if (vfs_create(current_parent, token, VNODE_DIRECTORY, permissions,
                                    &subdir) != 0)
                     {
@@ -137,7 +138,6 @@ int ramfs_parse(struct vnode *parent)
                 DEBUG("ramfs", "Creating file \"%s\" in directory \"%s\".", file_name, current_parent->name);
 
                 u32 permissions = 0;
-
                 permissions |= (mode & TUREAD) ? VNODE_PERMS_OWNER_READ : 0;
                 permissions |= (mode & TUWRITE) ? VNODE_PERMS_OWNER_WRITE : 0;
                 permissions |= (mode & TUEXEC) ? VNODE_PERMS_OWNER_EXECUTE : 0;
@@ -155,16 +155,12 @@ int ramfs_parse(struct vnode *parent)
                 }
 
                 new_file->creation_time = get_rtc_timestamp();
-                new_file->data = (u8 *)kmalloc(file_size);
-                if (!new_file->data)
-                {
-                    ERROR("ramfs", "Failed to allocate memory for file data \"%s\".", file_name);
-                    return 1;
-                }
-
-                memcpy(new_file->data, (u8 *)header + USTAR_HEADER_SIZE, file_size);
+                new_file->data = (u8 *)header + USTAR_HEADER_SIZE;
                 new_file->size = file_size;
                 DEBUG("ramfs", "Copied %u bytes to file \"%s\".", file_size, file_name);
+                DEBUG("ramfs", "File \"%s\" has permissions: %o", file_name, permissions);
+                DEBUG("ramfs", "File \"%s\" has creation time: %u", file_name, new_file->creation_time);
+                DEBUG("ramfs", "File \"%s\" has size: %u", file_name, new_file->size);
             }
         }
 
