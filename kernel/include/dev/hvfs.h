@@ -29,5 +29,6 @@ int write(FILE *file, const void *buffer, usize size);
 int chmod(FILE *file, int permissions);
 int chown(FILE *file, int uid);
 int close(FILE *file);
+bool hvfs_permission_check(vnode_t *node, int uid, vnode_perms_t required_perms);
 
 #endif // HVFS_H

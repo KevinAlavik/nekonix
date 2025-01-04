@@ -20,3 +20,13 @@ u64 syscall(u64 number, u64 arg1, u64 arg2, u64 arg3, u64 arg4, u64 arg5, u64 ar
 
   return result;
 }
+
+void write(u32 id, void *data, usize size)
+{
+  syscall(2, id, (u64)data, size, 0, 0, 0);
+}
+
+void *read(u32 id, void *out)
+{
+  return (void *)syscall(3, id, (u64)out, 0, 0, 0, 0);
+}

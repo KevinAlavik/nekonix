@@ -62,4 +62,12 @@ typedef double f64;
 
 typedef __SIZE_TYPE__ usize;
 
+typedef struct
+{
+    u32 id;
+    u8 (*poll)(void);
+    u64 (*read)(void *);
+    void (*write)(void *data, usize size);
+} handle_t;
+
 #endif // _TYPES_H

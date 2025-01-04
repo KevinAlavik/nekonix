@@ -44,7 +44,7 @@ FILE *open(const char *path, int mode)
     return fd;
 }
 
-bool permission_check(vnode_t *node, int uid, vnode_perms_t required_perms)
+bool hvfs_permission_check(vnode_t *node, int uid, vnode_perms_t required_perms)
 {
     if (node == NULL)
         return false;
@@ -102,7 +102,7 @@ int read(FILE *file, void *buffer, usize size)
         return -1;
     }
 
-    if (!permission_check(file->vnode, file->uid, VNODE_PERMS_OWNER_READ))
+    if (!hvfs_permission_check(file->vnode, file->uid, VNODE_PERMS_OWNER_READ))
     {
         ERROR("hvfs", "Insufficient permissions to read the file.");
         return -1;
@@ -135,7 +135,7 @@ int write(FILE *file, const void *buffer, usize size)
         return -1;
     }
 
-    if (!permission_check(file->vnode, file->uid, VNODE_PERMS_OWNER_WRITE))
+    if (!hvfs_permission_check(file->vnode, file->uid, VNODE_PERMS_OWNER_WRITE))
     {
         ERROR("hvfs", "Insufficient permissions to write to the file.");
         return -1;

@@ -3,6 +3,7 @@
 #include <mm/pmm.h>
 #include <mm/vmm.h>
 #include <proc/elf.h>
+#include <dev/hvfs.h>
 
 static scheduler_t scheduler;
 static u64 pid_counter = 0;
@@ -64,12 +65,28 @@ u64 scheduler_create_process(void (*entry)(void), const char *name)
     return proc->pid;
 }
 
-u64 scheduler_create_elf_process(u8 *data, const char *name)
+u64 scheduler_create_elf_process(char *path, const char *name)
 {
     if (scheduler.process_count >= MAX_PROCESSES)
     {
-        return -1; // Max process limit reached
+        return 0; // Max process limit reached
     }
+
+    FILE *init = open(path, READ_ONLY);
+    if (init == NULL)
+    {
+        ERROR("scheduler", "Failed to open \"%s\"", path);
+        return 0;
+    }
+
+    if (hvfs_permission_check(init->vnode, 0, VNODE_PERMS_OWNER_EXECUTE) == false)
+    {
+        ERROR("scheduler", "Permission denied to execute \"%s\", missing any execute permissions.", path);
+        return 0;
+    }
+
+    u8 *data = kmalloc(init->vnode->size);
+    read(init, data, init->vnode->size);
 
     u64 *pagemap = vmm_new_pagemap();
     u64 entry = elf_load(data, pagemap);
@@ -81,6 +98,7 @@ u64 scheduler_create_elf_process(u8 *data, const char *name)
 
     process_t *proc = process_create(entry, pagemap, name);
     scheduler.processes[scheduler.process_count++] = proc;
+    close(init);
     return proc->pid;
 }
 

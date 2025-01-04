@@ -1,15 +1,8 @@
 #include <syscall.h>
-
-void puts(const char *str)
-{
-    while (*str)
-    {
-        syscall(2, *str++, 0, 0, 0, 0, 0);
-    }
-}
+#include <types.h>
 
 int main()
 {
-    puts("Hello Nekonix >:D\n");
+    write(0, "Hello, World!\n", 14);
     return 69;
 }

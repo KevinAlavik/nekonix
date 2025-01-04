@@ -35,9 +35,8 @@ typedef struct
 // Function prototypes
 void scheduler_init();
 u64 scheduler_create_process(void (*entry)(void), const char *name);
-u64 scheduler_create_elf_process(u8 *data, const char *name);
+u64 scheduler_create_elf_process(char *path, const char *name);
 void scheduler_terminate_current_process(u64 exit_code);
-void scheduler_tick();
 void scheduler_context_switch(int_frame_t *frame);
 process_t *scheduler_get_current_process();
 void scheduler_idle();

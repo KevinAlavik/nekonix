@@ -18,6 +18,10 @@
 #include <dev/rtc.h>
 #include <dev/hvfs.h>
 #include <lib/seif.h>
+#include <proc/manager.h>
+#include <sys/pic.h>
+#include <proc/scheduler.h>
+#include <devices/stdout.h>
 
 #define _PMM_TESTS 10
 #define _VMM_TESTS 10
@@ -222,8 +226,56 @@ void draw_image(uint8_t *image)
     }
 }
 
+// TODO: MOVE
+#define PIT_CHANNEL_0 0x40
+#define PIT_COMMAND 0x43
+#define PIT_FREQUENCY 1193182
+#define IRQ0 0
+
+static volatile u64 tick_count = 0;
+
+static void timer_interrupt_handler(int_frame_t *frame)
+{
+    tick_count++;
+    scheduler_context_switch(frame);
+    pic_send_end_of_interrupt(IRQ0); // Send End of Interrupt signal to PIC
+}
+
+void timer_init(int frequency)
+{
+    if (frequency < 18 || frequency > 1000)
+    {
+        frequency = 100; // Default to 100Hz if out of range
+    }
+
+    u16 divisor = PIT_FREQUENCY / frequency;
+
+    outb(PIT_COMMAND, 0x36);                    // Set PIT to Mode 3 (Square Wave Generator)
+    outb(PIT_CHANNEL_0, divisor & 0xFF);        // Send low byte of divisor
+    outb(PIT_CHANNEL_0, (divisor >> 8) & 0xFF); // Send high byte of divisor
+
+    pic_configure(PIC_REMAP_OFFSET, PIC_REMAP_OFFSET + 8, true);
+    pic_unmask(IRQ0);
+
+    idt_irq_register(IRQ0, timer_interrupt_handler);
+}
+
+u64 timer_get_ticks()
+{
+    return tick_count;
+}
+
+void timer_sleep(u64 ticks)
+{
+    u64 start = timer_get_ticks();
+    while (timer_get_ticks() < start + ticks)
+    {
+        __asm__ volatile("hlt");
+    }
+}
+// end todo
+
 // Kernel entry point.
-extern void test();
 void sys_entry(void)
 {
     // Serial output setup
@@ -402,8 +454,14 @@ void sys_entry(void)
         hcf();
     }
 
-    test();
+    stdout_init();
+    device_register(&stdout_handle);
+
+    scheduler_init();
+    timer_init(100);
+    scheduler_create_elf_process("/bin/init", "Init");
     __asm__ volatile("int $0x20");
+
     INFO("boot", "Finished initializing Nekonix.");
 
     hlt();
