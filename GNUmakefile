@@ -120,6 +120,7 @@ $(IMAGE_NAME).hdd: limine/limine kernel
 clean:
 	$(MAKE) -C kernel clean
 	rm -rf iso_root $(IMAGE_NAME).iso $(IMAGE_NAME).hdd
+	python3 sysroot/build.py clean
 
 .PHONY: distclean
 distclean: clean

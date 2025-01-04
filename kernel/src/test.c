@@ -55,31 +55,11 @@ void timer_sleep(u64 ticks)
     }
 }
 
-void procA()
-{
-    while (1)
-    {
-        flanterm_putchar('A');
-        timer_sleep(2);
-    }
-}
-
-void procB()
-{
-    while (1)
-    {
-        serial_putchar('B');
-        timer_sleep(2);
-    }
-}
-
 void test()
 {
 
     scheduler_init();
     timer_init(100);
-    // scheduler_create_process(procA);
-    // scheduler_create_process(procB);
 
     FILE *init = open("/bin/init", READ_ONLY);
     if (init == NULL)
@@ -90,7 +70,7 @@ void test()
 
     u8 *data = kmalloc(init->vnode->size);
     read(init, data, init->vnode->size);
-    scheduler_create_elf_process(data, "init");
+    scheduler_create_elf_process(data, "Init");
 
     close(init);
 }

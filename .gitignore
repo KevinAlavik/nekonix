@@ -3,6 +3,8 @@
 /ovmf
 *.iso
 *.hdd
+*.img
+*.o
 limine.h
 nanoprintf.h
 .config*
@@ -13,5 +15,6 @@ initrd.img
 /initrd/boot/nnix-*
 /.vscode
 /.cache
-/test/bin
-/test/build
+/sysroot/bin
+/sysroot/build
+/libc/lib

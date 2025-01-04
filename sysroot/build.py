@@ -5,6 +5,7 @@ import sys
 
 CC = 'x86_64-elf-gcc'
 LD = 'x86_64-elf-ld'
+AR = 'x86_64-elf-ar'
 NASM = 'nasm'
 CFLAGS = '-ffreestanding -nostdlib -fno-builtin -I../libc/include'
 LDFLAGS = '-m elf_x86_64 -nostdlib -z text -z max-page-size=0x1000'
@@ -13,6 +14,7 @@ ASMFLAGS = '-f elf64'
 APPS = ['init']
 BUILD_DIR = 'build'
 BIN_DIR = 'bin'
+LIBC_DIR = '../libc'
 
 def run_command(command, cwd=None):
     subprocess.run(command, shell=True, cwd=cwd, check=True)
@@ -20,6 +22,9 @@ def run_command(command, cwd=None):
 def ensure_dir(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
+
+def build_libc():
+    run_command(f'CC={CC} AR={AR} make', cwd=LIBC_DIR)
 
 def build_crt0():
     ensure_dir(BUILD_DIR)
@@ -44,7 +49,7 @@ def build_app(app):
     binary_file = os.path.join(BIN_DIR, app)
     
     linker_script = os.path.join(app, 'linker.ld')
-    run_command(f'{LD} {LDFLAGS} -T {linker_script} -o {binary_file} {" ".join(obj_files)} {BUILD_DIR}/crt0.o')
+    run_command(f'{LD} {LDFLAGS} -T {linker_script} -o {binary_file} {" ".join(obj_files)} {BUILD_DIR}/crt0.o {LIBC_DIR}/lib/libc.a')
 
 def build_all_apps():
     for app in APPS:
@@ -53,6 +58,7 @@ def build_all_apps():
 def clean():
     shutil.rmtree(BUILD_DIR, ignore_errors=True)
     shutil.rmtree(BIN_DIR, ignore_errors=True)
+    run_command('make clean', cwd=LIBC_DIR)
 
 def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -64,6 +70,7 @@ def main():
     
     command = sys.argv[1]
     if command == 'all':
+        build_libc()
         build_crt0()
         build_all_apps()
     elif command == 'clean':
