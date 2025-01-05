@@ -50,7 +50,6 @@ handle_t *device_get(u32 id)
         return NULL;
     }
 
-    DEBUG("manager", "Found device, device id: %d, address: 0x%.16llx", id, (u64)device);
     return device;
 }
 

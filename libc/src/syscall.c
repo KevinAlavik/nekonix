@@ -26,7 +26,12 @@ void write(u32 id, void *data, usize size)
   syscall(2, id, (u64)data, size, 0, 0, 0);
 }
 
-void *read(u32 id, void *out)
+u64 read(u32 id, void *out)
 {
-  return (void *)syscall(3, id, (u64)out, 0, 0, 0, 0);
+  return syscall(3, id, (u64)out, 0, 0, 0, 0);
+}
+
+u8 poll(u32 id)
+{
+  return (u8)syscall(4, id, 0, 0, 0, 0, 0);
 }

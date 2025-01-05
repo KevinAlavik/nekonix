@@ -3,18 +3,33 @@
 
 int main()
 {
-    printf("Hello, World!\n");
+    printf("Hello, World! try typing :^)\n");
     while (1)
     {
-        u8 data = 0;
-        if (read(1, &data) == 0)
-        {
-            printf("Error: Failed to read from stdin.\n");
-            return 1;
-        }
+        key_t key;
+        while (poll(1) == DEVICE_BUSY)
+            ;
+        u64 status = read(1, &key);
 
-        if (data != 0x0)
-            printf("Received: 0x%x\n", data);
+        if (status != 0 && key.released == false && key.sym)
+        {
+            if (key.scancode == KEYCODE_SPACE)
+            {
+                printf(" ");
+            }
+            else if (key.scancode == KEYCODE_ENTER)
+            {
+                printf("\n");
+            }
+            else if (key.scancode == KEYCODE_BACKSPACE)
+            {
+                printf("\b \b");
+            }
+            else
+            {
+                printf("%s", key.sym);
+            }
+        }
     }
 
     return 69;

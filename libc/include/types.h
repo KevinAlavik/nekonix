@@ -62,6 +62,9 @@ typedef double f64;
 
 typedef __SIZE_TYPE__ usize;
 
+#define DEVICE_READY 0
+#define DEVICE_BUSY 1
+
 typedef struct
 {
     u32 id;
@@ -69,5 +72,21 @@ typedef struct
     u64 (*read)(void *);
     void (*write)(void *data, usize size);
 } handle_t;
+
+#define KEYCODE_SPACE 0x39
+#define KEYCODE_ENTER 0x1C
+#define KEYCODE_ESC 0x01
+#define KEYCODE_BACKSPACE 0x0E
+#define KEYCODE_UP 0x48
+#define KEYCODE_DOWN 0x50
+#define KEYCODE_LEFT 0x4B
+#define KEYCODE_RIGHT 0x4D
+
+typedef struct
+{
+    const char *sym;
+    u8 scancode;
+    bool released;
+} key_t;
 
 #endif // _TYPES_H

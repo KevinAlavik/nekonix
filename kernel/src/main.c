@@ -23,6 +23,7 @@
 #include <proc/scheduler.h>
 #include <devices/stdout.h>
 #include <devices/stdin.h>
+#include <sys/syscall.h>
 
 #define _PMM_TESTS 10
 #define _VMM_TESTS 10
@@ -469,6 +470,9 @@ void sys_entry(void)
 
     scheduler_init();
     timer_init(100);
+
+    ft_ctx->full_refresh(ft_ctx);
+
     scheduler_create_elf_process("/bin/init", "Init");
 
     hlt();

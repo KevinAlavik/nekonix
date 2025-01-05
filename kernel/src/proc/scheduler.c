@@ -53,7 +53,6 @@ void scheduler_init()
     scheduler.current_index = 0;
     scheduler.tick_count = 0;
 }
-
 u64 scheduler_create_process(void (*entry)(void), const char *name)
 {
     if (scheduler.process_count >= MAX_PROCESSES)
