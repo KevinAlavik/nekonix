@@ -1,6 +1,7 @@
 #include <sys/pic.h>
 #include <dev/serial.h>
 #include <dev/serial_util.h>
+#include <boot/nnix.h>
 
 #define PIC1_COMMAND 0x20
 #define PIC1_DATA 0x21
@@ -15,7 +16,9 @@
 #define PIC_CMD_READ_IRR 0x0A
 #define PIC_CMD_READ_ISR 0x0B
 
-u16 _pic_mask = 0xFFFF;
+#define PIC_REMAP_OFFSET 0x20 // Default remap offset for IRQs
+
+static u16 _pic_mask = 0xFFFF;
 
 void pic_set_mask(u16 mask)
 {
@@ -24,15 +27,21 @@ void pic_set_mask(u16 mask)
     io_wait();
     outb(PIC2_DATA, _pic_mask >> 8);
     io_wait();
+
+    DEBUG("pic", "Set PIC mask to 0x%04X", _pic_mask);
 }
 
 u16 pic_get_mask()
 {
-    return inb(PIC1_DATA) | (inb(PIC2_DATA) << 8);
+    u16 mask = inb(PIC1_DATA) | (inb(PIC2_DATA) << 8);
+    DEBUG("pic", "Retrieved PIC mask: 0x%04X", mask);
+    return mask;
 }
 
 void pic_configure(u8 offset_pic1, u8 offset_pic2, bool auto_eoi)
 {
+    DEBUG("pic", "Configuring PIC with offsets 0x%02X and 0x%02X (auto_eoi=%d)", offset_pic1, offset_pic2, auto_eoi);
+
     pic_set_mask(0xFFFF);
 
     outb(PIC1_COMMAND, PIC_ICW1_INITIALIZE | PIC_ICW1_ICW4);
@@ -62,6 +71,8 @@ void pic_configure(u8 offset_pic1, u8 offset_pic2, bool auto_eoi)
     io_wait();
 
     pic_set_mask(0xFFFF); // Mask all IRQs initially
+
+    DEBUG("pic", "PIC configured successfully");
 }
 
 void pic_send_end_of_interrupt(int irq)
@@ -77,22 +88,26 @@ void pic_send_end_of_interrupt(int irq)
 
 void pic_disable()
 {
+    DEBUG("pic", "Disabling PIC (masking all IRQs)");
     pic_set_mask(0xFFFF); // Mask all IRQs
 }
 
 void pic_enable()
 {
+    DEBUG("pic", "Enabling PIC with default configuration");
     pic_configure(PIC_REMAP_OFFSET, PIC_REMAP_OFFSET + 8, false);
     pic_set_mask(0xFFFF);
 }
 
 void pic_mask(int irq)
 {
+    DEBUG("pic", "Masking IRQ %d", irq);
     pic_set_mask(_pic_mask | (1 << irq));
 }
 
 void pic_unmask(int irq)
 {
+    DEBUG("pic", "Unmasking IRQ %d", irq);
     pic_set_mask(_pic_mask & ~(1 << irq));
 }
 
@@ -104,6 +119,8 @@ u16 pic_read_irq_request_register()
     outb(PIC2_COMMAND, PIC_CMD_READ_IRR);
     io_wait();
     irr |= ((u16)inb(PIC2_DATA)) << 8;
+
+    DEBUG("pic", "Read IRQ Request Register: 0x%04X", irr);
     return irr;
 }
 
@@ -115,5 +132,22 @@ u16 pic_read_in_service_register()
     outb(PIC2_COMMAND, PIC_CMD_READ_ISR);
     io_wait();
     isr |= ((u16)inb(PIC2_DATA)) << 8;
+
+    DEBUG("pic", "Read In-Service Register: 0x%04X", isr);
     return isr;
+}
+
+int pic_init()
+{
+    DEBUG("pic", "Initializing PIC");
+    pic_configure(PIC_REMAP_OFFSET, PIC_REMAP_OFFSET + 8, false);
+
+    // Mask all IRQs
+    for (int i = 0; i < 16; i++)
+    {
+        pic_mask(i);
+    }
+
+    DEBUG("pic", "PIC initialization complete");
+    return 0;
 }

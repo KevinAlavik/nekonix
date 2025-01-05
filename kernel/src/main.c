@@ -22,6 +22,7 @@
 #include <sys/pic.h>
 #include <proc/scheduler.h>
 #include <devices/stdout.h>
+#include <devices/stdin.h>
 
 #define _PMM_TESTS 10
 #define _VMM_TESTS 10
@@ -254,7 +255,6 @@ void timer_init(int frequency)
     outb(PIT_CHANNEL_0, divisor & 0xFF);        // Send low byte of divisor
     outb(PIT_CHANNEL_0, (divisor >> 8) & 0xFF); // Send high byte of divisor
 
-    pic_configure(PIC_REMAP_OFFSET, PIC_REMAP_OFFSET + 8, true);
     pic_unmask(IRQ0);
 
     idt_irq_register(IRQ0, timer_interrupt_handler);
@@ -370,6 +370,12 @@ void sys_entry(void)
         idt_error_count++;
     }
 
+    if (pic_init() != 0)
+    {
+        ERROR("boot", "Failed to initialize PIC, unknown error.");
+        idt_error_count++;
+    }
+
     INFO("boot", "Initialized IDT (%d errors reported)", idt_error_count);
     if (idt_error_count > 0)
     {
@@ -454,15 +460,16 @@ void sys_entry(void)
         hcf();
     }
 
+    pic_unmask(1);
+
     stdout_init();
     device_register(&stdout_handle);
+    stdin_init();
+    device_register(&stdin_handle);
 
     scheduler_init();
     timer_init(100);
     scheduler_create_elf_process("/bin/init", "Init");
-    __asm__ volatile("int $0x20");
-
-    INFO("boot", "Finished initializing Nekonix.");
 
     hlt();
 }

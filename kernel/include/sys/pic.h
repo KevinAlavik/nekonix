@@ -11,6 +11,7 @@ void pic_enable();
 void pic_mask(int irq);
 void pic_unmask(int irq);
 void pic_send_end_of_interrupt(int irq);
+int pic_init();
 
 u16 pic_read_irq_request_register();
 u16 pic_read_in_service_register();

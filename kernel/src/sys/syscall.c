@@ -27,7 +27,6 @@ u64 syscall_handler(int_frame_t *frame)
 
         while (device->poll() == DEVICE_BUSY)
             ;
-
         device->write((void *)frame->rsi, frame->rdx);
         return 0;
     case 3: // read(id, out)

@@ -270,7 +270,7 @@ void idt_handler(int_frame_t frame)
     }
     else if (frame.vector == 0x80) // System call
     {
-        DEBUG("interrupt", "Received system call from proc %s (syscall: %llu)", scheduler_get_current_process()->name, frame.rax);
+        // DEBUG("interrupt", "Received system call from proc %s (syscall: %llu)", scheduler_get_current_process()->name, frame.rax);
         frame.rax = syscall_handler(&frame);
     }
     else // Unknown interrupt
