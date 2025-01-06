@@ -1,4 +1,5 @@
 #include <limine.h>
+#include <nnix.h>
 #include <lib/string.h>
 #include <sys/portio.h>
 #include <utils/printf.h>
@@ -20,6 +21,10 @@ int serial_putchar(char ch)
     outb(0xE9, ch);
     return ch;
 }
+
+// Allow for max 10 command line arguments passed to the kernel.
+struct cmdline_arg kernel_args[10];
+int kernel_arg_count = 0;
 
 void kmain(void)
 {
@@ -52,9 +57,20 @@ void kmain(void)
         hcf();
     }
 
-    struct limine_file *file = kernel_file_request.response->executable_file;
+    struct limine_file *kernel_file = kernel_file_request.response->executable_file;
+    printf("cmdline: %s\n", kernel_file->cmdline);
+    parse_cmdline(kernel_file->cmdline, kernel_args);
+    while (kernel_args[kernel_arg_count].name != NULL)
+    {
+        kernel_arg_count++;
+    }
 
-    printf("%s\n", file->cmdline);
+    for (int i = 0; i < kernel_arg_count; i++)
+    {
+        printf("arg %d: {%s, %s}\n", i,
+               kernel_args[i].name ? kernel_args[i].name : "NULL",
+               kernel_args[i].value ? kernel_args[i].value : "NULL");
+    }
 
     hcf();
 }
