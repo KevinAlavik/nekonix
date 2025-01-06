@@ -1,7 +1,7 @@
 MAKEFLAGS += -rR
 .SUFFIXES:
 
-QEMUFLAGS := -m 2G
+QEMUFLAGS := -m 2G -debugcon stdio
 
 override IMAGE_NAME := Nekonix
 

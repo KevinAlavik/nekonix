@@ -13,6 +13,7 @@ OBJ_DIR := obj
 
 # Kernel build flags
 IFLAGS := \
+    -I../include/ \
     -I../include/kernel
 
 CFLAGS := \
