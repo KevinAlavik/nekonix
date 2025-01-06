@@ -2,7 +2,7 @@
 Stay tuned!
 
 ## License
-This project is licensed under the Nekonix License, see LICENSE
+This project is licensed under the Nekonix License-v1, see LICENSE
 
 ```cpp
 /*
