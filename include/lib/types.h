@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+// Basic types.
+
 typedef int8_t i8;
 typedef uint8_t u8;
 typedef int16_t i16;
@@ -17,6 +19,7 @@ typedef uint64_t u64;
 typedef size_t usize;
 typedef uintptr_t uptr;
 
+// Generic spinlock implementation using atomic operations.
 typedef struct spinlock
 {
     volatile int locked;

@@ -17,7 +17,7 @@ all: $(BIN_DIR)/$(OUTPUT)
 
 # Dependencies check
 ifneq ($(shell ( test '$(MAKECMDGOALS)' = clean || test '$(MAKECMDGOALS)' = distclean ); echo $$?),0)
-    ifeq ($(shell ( ! test -d $(CONF_PREFIX)/freestnd-c-hdrs-0bsd || ! test -d $(CONF_PREFIX)/cc-runtime || ! test -f ../include/kernel/limine.h ); echo $$?),0)
+    ifeq ($(shell ( ! test -d $(CONF_PREFIX)/freestnd-c-hdrs-0bsd || ! test -d $(CONF_PREFIX)/cc-runtime || ! test -f ../include/kernel/limine.h  || ! test -f ../include/lib/_internal/nanoprintf.h ); echo $$?),0)
         $(error Please run the $(KERNEL_CONF_PREFIX)/get-deps script first)
     endif
 endif

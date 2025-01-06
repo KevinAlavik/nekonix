@@ -8,3 +8,4 @@ limine/
 *.iso
 include/kernel/limine.h
 kernel-deps
+include/*/_internal

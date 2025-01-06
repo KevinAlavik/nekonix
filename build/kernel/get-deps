@@ -78,3 +78,9 @@ download_by_hash \
     https://github.com/limine-bootloader/limine/raw/7cddb61183685d9bddd2eb13d42223d929c2abe6/limine.h \
     include/kernel/limine.h \
     c00e7d4cd6e2674eca481f978b64a7fb8c8479cc32c466ec35aad2207761bf01
+
+
+download_by_hash \
+    https://codeberg.org/kevinalavik/Athix/raw/commit/4ce55c7f29be4e52b0290bcea397c4421f12254c/athix/include/common/nanoprintf.h \
+    include/lib/_internal/nanoprintf.h \
+    98641bce2d50c498d1b091464d505e69b818c03bd90bf9b15a37e8be8698e40e

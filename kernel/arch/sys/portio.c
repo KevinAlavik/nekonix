@@ -1,5 +1,6 @@
 #include <sys/portio.h>
 
+// Generic port I/O using the x86_64 instructions.
 void outb(u16 port, u8 data)
 {
     __asm__ volatile("outb %0, %1" : : "a"(data), "Nd"(port));
