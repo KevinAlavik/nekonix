@@ -1,4 +1,10 @@
 *.o
 bin/
-build/
+obj/
+build/cc-runtime*
+build/freestnd-c-hdrs-0bsd*
 .vscode/
+limine/
+*.iso
+include/kernel/limine.h
+kernel-deps
