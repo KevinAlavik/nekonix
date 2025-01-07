@@ -14,7 +14,8 @@ OBJ_DIR := obj
 # Kernel build flags
 IFLAGS := \
     -I../include/ \
-    -I../include/kernel
+    -I../include/kernel \
+    -I../kernel
 
 CFLAGS := \
 	-g -O2 -pipe \

@@ -9,3 +9,4 @@ limine/
 include/kernel/limine.h
 kernel-deps
 include/*/_internal
+kernel/utils/flanterm/

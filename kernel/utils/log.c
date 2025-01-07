@@ -9,9 +9,11 @@ void _log_callback(bool debug, char *file, int line, char *level, char *scope, c
     {
         va_list args;
         va_start(args, format);
-        printf("%s[%s:%d] %s @ %s: ", color, file, line, level, scope);
+
+        printf("%s[%s] (%s:%d) [%s] %s: ", color, level, file, line, scope, ANSI_COLOR_RESET);
         vprintf(format, args);
-        printf("%s\n", ANSI_COLOR_RESET);
+        printf("\n");
+
         va_end(args);
     }
 }
