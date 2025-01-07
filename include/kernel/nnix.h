@@ -153,6 +153,7 @@ static inline bool cmdline_get_bool(const char *name, bool default_value)
 }
 
 extern bool kernel_debug_enabled;
+extern int kernel_log_level;
 
 #define VERSION_MAJOR "1"
 #define VERSION_MINOR "0"

@@ -11,11 +11,13 @@
 #define ANSI_COLOR_CYAN "\033[36m"
 #define ANSI_COLOR_RESET "\033[0m"
 
-#define INFO(format, ...) _log_callback(false, __FILE__, __LINE__, "INFO", __func__, ANSI_COLOR_GREEN, format, ##__VA_ARGS__)
-#define WARN(format, ...) _log_callback(false, __FILE__, __LINE__, "WARN", __func__, ANSI_COLOR_YELLOW, format, ##__VA_ARGS__)
-#define ERROR(format, ...) _log_callback(false, __FILE__, __LINE__, "ERROR", __func__, ANSI_COLOR_RED, format, ##__VA_ARGS__)
-#define DEBUG(format, ...) _log_callback(true, __FILE__, __LINE__, "DEBUG", __func__, ANSI_COLOR_BLUE, format, ##__VA_ARGS__)
+#define NOTE(format, ...) _log_callback(0, false, __FILE__, __LINE__, "NOTE", __func__, ANSI_COLOR_MAGENTA, format, ##__VA_ARGS__)
+#define ERROR(format, ...) _log_callback(1, false, __FILE__, __LINE__, "ERROR", __func__, ANSI_COLOR_RED, format, ##__VA_ARGS__)
+#define WARN(format, ...) _log_callback(2, false, __FILE__, __LINE__, "WARN", __func__, ANSI_COLOR_YELLOW, format, ##__VA_ARGS__)
+#define INFO(format, ...) _log_callback(3, false, __FILE__, __LINE__, "INFO", __func__, ANSI_COLOR_GREEN, format, ##__VA_ARGS__)
+#define DEBUG(format, ...) _log_callback(4, true, __FILE__, __LINE__, "DEBUG", __func__, ANSI_COLOR_BLUE, format, ##__VA_ARGS__)
+#define TRACE(format, ...) _log_callback(5, true, __FILE__, __LINE__, "TRACE", __func__, ANSI_COLOR_CYAN, format, ##__VA_ARGS__)
 
-void _log_callback(bool debug, char *file, int line, char *level, char *scope, char *color, char *format, ...);
+void _log_callback(int log_level, bool debug, const char *file, int line, const char *level, const char *scope, const char *color, const char *format, ...);
 
 #endif // LOG_H

@@ -20,9 +20,12 @@ __attribute__((used, section(".limine_requests_start"))) static volatile LIMINE_
 __attribute__((used, section(".limine_requests_end"))) static volatile LIMINE_REQUESTS_END_MARKER;
 
 struct flanterm_context *ft_ctx;
-bool kernel_debug_enabled = false;
+
 struct cmdline_arg kernel_args[10];
 int kernel_arg_count = 0;
+
+bool kernel_debug_enabled = false;
+int kernel_log_level = 0;
 
 int serial_putchar(char ch)
 {
@@ -86,14 +89,26 @@ void kmain(void)
         kernel_arg_count++;
     }
 
-    if (cmdline_has_arg("debug") && cmdline_get_bool("debug", false))
-    {
-        kernel_debug_enabled = true;
-    }
+    kernel_debug_enabled = cmdline_get_bool("debug", false);
+    kernel_log_level = cmdline_get_int("loglevel", 0);
 
     INFO("Nekonix v%s.%s.%s%s", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_EXTRA);
+    INFO("Kernel arguments:");
+    for (int i = 0; i < kernel_arg_count; i++)
+    {
+        INFO("  %s=%s", kernel_args[i].name ? kernel_args[i].name : "(null)", kernel_args[i].value ? kernel_args[i].value : "(null)");
+    }
+    INFO("Log Level: %d", kernel_log_level);
 
-    INFO("Kernel started successfully");
+    NOTE("This is an important message");
+    INFO("This is a info message");
+    WARN("This is a warning message");
+    ERROR("This is a error message");
+    DEBUG("This is a debug message");
+    TRACE("This is a trace message");
 
-    hcf();
+    INFO("Kernel Debugging Enabled: %s", kernel_debug_enabled ? "true" : "false");
+    INFO("Kernel Log Level: %d", kernel_log_level);
+
+    halt();
 }
