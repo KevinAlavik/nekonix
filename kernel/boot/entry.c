@@ -180,7 +180,5 @@ void kmain(void)
     DEBUG("Allocated page at 0x%llx, value: %d", a, *a);
     pmm_free_page((void *)a);
 
-    memset((void *)0xdeadbeef, 0, 4096);
-
     halt();
 }
