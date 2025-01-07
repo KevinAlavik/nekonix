@@ -180,5 +180,8 @@ void kmain(void)
     INFO("Allocated page at 0x%llx, value: %d", a, *a);
     pmm_free_page((void *)a);
 
+    int *b = (int *)0xdeadbeef;
+    *b = 42;
+
     halt();
 }

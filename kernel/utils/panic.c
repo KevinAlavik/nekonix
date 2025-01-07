@@ -52,10 +52,7 @@ void panic(int_frame_t *frame, const char *kind, const char *message, bool halt)
     else
         PANIC("%s: %s @ <???> on CPU %s", kind, message, "<unknown>");
 
-    if (frame)
-    {
-        dump_registers(frame);
-    }
+    dump_registers(frame);
 
     if (halt)
         hcf();
