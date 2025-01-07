@@ -19,7 +19,7 @@ static inline void parse_cmdline(char *cmdline, struct cmdline_arg argv[])
     bool inside_quotes = false;
     char current_value[256] = {0};
 
-    token = strtok(cmdline, "\" ");
+    token = strtok(cmdline, " ");
     while (token != NULL)
     {
         if (inside_quotes)
@@ -68,7 +68,7 @@ static inline void parse_cmdline(char *cmdline, struct cmdline_arg argv[])
             }
         }
 
-        token = strtok(NULL, "\" ");
+        token = strtok(NULL, " ");
     }
     argv[i].name = NULL;
 }
@@ -151,5 +151,12 @@ static inline bool cmdline_get_bool(const char *name, bool default_value)
     }
     return default_value;
 }
+
+extern bool kernel_debug_enabled;
+
+#define VERSION_MAJOR "1"
+#define VERSION_MINOR "0"
+#define VERSION_PATCH "0"
+#define VERSION_EXTRA "-unstable-alpha"
 
 #endif

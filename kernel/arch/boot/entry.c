@@ -4,6 +4,7 @@
 #include <sys/portio.h>
 #include <utils/printf.h>
 #include <sys/cpu.h>
+#include <utils/log.h>
 
 __attribute__((used, section(".limine_requests"))) static volatile LIMINE_BASE_REVISION(3);
 __attribute__((used, section(".limine_requests"))) static volatile struct limine_framebuffer_request framebuffer_request = {
@@ -22,7 +23,8 @@ int serial_putchar(char ch)
     return ch;
 }
 
-// Allow for max 10 command line arguments passed to the kernel.
+bool kernel_debug_enabled = false;
+
 struct cmdline_arg kernel_args[10];
 int kernel_arg_count = 0;
 
@@ -65,12 +67,12 @@ void kmain(void)
         kernel_arg_count++;
     }
 
-    for (int i = 0; i < kernel_arg_count; i++)
+    if (cmdline_has_arg("debug") && cmdline_get_bool("debug", false))
     {
-        printf("arg %d: {%s, %s}\n", i,
-               kernel_args[i].name ? kernel_args[i].name : "NULL",
-               kernel_args[i].value ? kernel_args[i].value : "NULL");
+        kernel_debug_enabled = true;
     }
+
+    INFO("Nekonix v%s.%s.%s%s", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_EXTRA);
 
     hcf();
 }
