@@ -15,10 +15,14 @@
 #include <sys/portio.h>
 #include <utils/printf.h>
 #include <sys/cpu.h>
+#define KLOG_MODULE "boot"
 #include <utils/log.h>
 #include <utils/flanterm/flanterm.h>
 #include <utils/flanterm/backends/fb.h>
 #include <sys/gdt.h>
+#include <sys/idt.h>
+#include <utils/panic.h>
+#include <mm/pmm.h>
 
 __attribute__((used, section(".limine_requests"))) static volatile LIMINE_BASE_REVISION(3);
 __attribute__((used, section(".limine_requests"))) static volatile struct limine_framebuffer_request framebuffer_request = {
@@ -28,14 +32,25 @@ __attribute__((section(".limine_requests"))) static volatile struct limine_execu
     .id = LIMINE_EXECUTABLE_FILE_REQUEST,
     .revision = 0,
     .response = NULL};
+__attribute__((used, section(".limine_requests"))) static volatile struct limine_memmap_request memmap_request = {
+    .id = LIMINE_MEMMAP_REQUEST,
+    .response = 0,
+};
+__attribute__((used, section(".limine_requests"))) static volatile struct limine_hhdm_request hhdm_request = {
+    .id = LIMINE_HHDM_REQUEST,
+    .response = 0,
+};
 __attribute__((used, section(".limine_requests_start"))) static volatile LIMINE_REQUESTS_START_MARKER;
 __attribute__((used, section(".limine_requests_end"))) static volatile LIMINE_REQUESTS_END_MARKER;
 
 struct flanterm_context *ft_ctx;
 struct cmdline_arg kernel_args[10];
+
 int kernel_arg_count = 0;
 bool kernel_debug_enabled = false;
 int kernel_log_level = 0;
+
+u64 hhdm_offset = 0;
 
 int serial_putchar(char ch)
 {
@@ -49,9 +64,18 @@ int flanterm_putchar(char ch)
     return ch;
 }
 
+int mirror_putchar(char ch)
+{
+    serial_putchar(ch);
+    if (ft_ctx)
+        flanterm_putchar(ch);
+    return ch;
+}
+
 void kmain(void)
 {
     putchar_impl = serial_putchar;
+    printf("\033c");
 
     if (!LIMINE_BASE_REVISION_SUPPORTED)
     {
@@ -99,29 +123,62 @@ void kmain(void)
     kernel_debug_enabled = cmdline_get_bool("debug", false);
     kernel_log_level = cmdline_get_int("loglevel", 0);
 
+    if (cmdline_get_bool("mirror", false))
+        putchar_impl = mirror_putchar;
+
     INFO("Nekonix v%s.%s.%s%s", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_EXTRA);
-    INFO("Kernel arguments:");
+
     for (int i = 0; i < kernel_arg_count; i++)
     {
-        INFO("  %s=%s", kernel_args[i].name ? kernel_args[i].name : "(null)", kernel_args[i].value ? kernel_args[i].value : "(null)");
+        INFO("Kernel argument: %s=%s", kernel_args[i].name, kernel_args[i].value ? kernel_args[i].value : "null");
     }
-    INFO("Log Level: %d", kernel_log_level);
-
-    NOTE("This is an important message");
-    INFO("This is an info message");
-    WARN("This is a warning message");
-    ERROR("This is an error message");
-    DEBUG("This is a debug message");
-    TRACE("This is a trace message");
-
-    INFO("Kernel Debugging Enabled: %s", kernel_debug_enabled ? "true" : "false");
-    INFO("Kernel Log Level: %d", kernel_log_level);
 
     if (gdt_init() != 0)
     {
-        ERROR("Failed to initialize GDT");
+        PANIC("Failed to initialize GDT, unknown error");
         hcf();
     }
+    INFO("GDT initialized with 0 errors reported.");
+
+    cli();
+    if (idt_init() != 0)
+    {
+        PANIC("Failed to initialize IDT, unknown error");
+        hcf();
+    }
+    sti();
+    INFO("IDT initialized with 0 errors reported.");
+
+    if (memmap_request.response == NULL)
+    {
+        PANIC("No memory map found");
+        hcf();
+    }
+
+    if (hhdm_request.response == NULL)
+    {
+        PANIC("No HHDM offset found");
+        hcf();
+    }
+
+    hhdm_offset = hhdm_request.response->offset;
+
+    if (pmm_init(memmap_request.response) != 0)
+    {
+        PANIC("Failed to initialize PMM, unknown error");
+        hcf();
+    }
+    INFO("PMM initialized with 0 errors reported.");
+
+    int *a = (int *)HIGHER_HALF(pmm_request_page());
+    if (a == NULL)
+    {
+        PANIC("Failed to allocate page");
+        hcf();
+    }
+    *a = 42;
+    INFO("Allocated page at 0x%llx, value: %d", a, *a);
+    pmm_free_page((void *)a);
 
     halt();
 }

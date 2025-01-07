@@ -14,6 +14,7 @@
 
 #include <lib/string.h>
 #include <utils/printf.h>
+#include <utils/flanterm/flanterm.h>
 
 #define LIMINE_API_REVISION 2
 
@@ -170,5 +171,8 @@ extern int kernel_log_level;
 #define VERSION_MINOR "0"
 #define VERSION_PATCH "0"
 #define VERSION_EXTRA "-unstable-alpha"
+
+extern struct flanterm_context *ft_ctx;
+extern u64 hhdm_offset;
 
 #endif

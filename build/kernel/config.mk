@@ -37,6 +37,7 @@ CFLAGS := \
     -mno-sse2 \
     -mno-red-zone \
     -mcmodel=kernel \
+    -Wno-trigraphs \
     $(IFLAGS)
 
 CPPFLAGS := \

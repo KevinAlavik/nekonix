@@ -10,6 +10,7 @@
  */
 
 #include <sys/gdt.h>
+#define KLOG_MODULE "gdt"
 #include <utils/log.h>
 
 gdt_ptr_t gdtpr;

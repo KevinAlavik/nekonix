@@ -20,7 +20,18 @@ void _log_callback(int log_level, bool debug, const char *file, int line, const 
     {
         va_list args;
         va_start(args, format);
-        printf("%s[%-*s] (%s:%d) [%s] %s: ", color, 5, level, file, line, scope, ANSI_COLOR_RESET);
+
+        // (file:line) LEVEL @ scope: MESSAGE, with color
+
+        if (debug || kernel_debug_enabled)
+        {
+            printf("%s[%s:%d] %s @ %s%s: ", color, file, line, level, scope, ANSI_COLOR_RESET);
+        }
+        else
+        {
+            printf("%s%s @ %s%s: ", color, level, scope, ANSI_COLOR_RESET);
+        }
+
         vprintf(format, args);
         printf("\n");
 

@@ -1,33 +1,37 @@
-/*
- * Copyright (c) 2024 Kevin Alavik <kevin@alavik.se>
- *
- * Licensed under the Nekonix License-v1
- * See the LICENSE file for more details.
- *
- * You are allowed to use, modify, and distribute this software in both private and commercial environments,
- * as long as you retain the copyright notice and do not remove or alter any copyright notice or attribution.
- * This software is provided "as-is" without warranty of any kind.
- */
-
 #ifndef LOG_H
 #define LOG_H
 
 #include <lib/types.h>
 
-#define ANSI_COLOR_RED "\033[31m"
-#define ANSI_COLOR_GREEN "\033[32m"
-#define ANSI_COLOR_YELLOW "\033[33m"
-#define ANSI_COLOR_BLUE "\033[34m"
-#define ANSI_COLOR_MAGENTA "\033[35m"
-#define ANSI_COLOR_CYAN "\033[36m"
+// Softer color definitions for better readability
+#define ANSI_COLOR_RED "\033[38;5;9m"
+#define ANSI_COLOR_GREEN "\033[38;5;10m"
+#define ANSI_COLOR_YELLOW "\033[38;5;11m"
+#define ANSI_COLOR_BLUE "\033[38;5;12m"
+#define ANSI_COLOR_MAGENTA "\033[38;5;13m"
+#define ANSI_COLOR_CYAN "\033[38;5;14m"
 #define ANSI_COLOR_RESET "\033[0m"
 
-#define NOTE(format, ...) _log_callback(0, false, __FILE__, __LINE__, "NOTE", __func__, ANSI_COLOR_MAGENTA, format, ##__VA_ARGS__)
-#define ERROR(format, ...) _log_callback(1, false, __FILE__, __LINE__, "ERROR", __func__, ANSI_COLOR_RED, format, ##__VA_ARGS__)
-#define WARN(format, ...) _log_callback(2, false, __FILE__, __LINE__, "WARN", __func__, ANSI_COLOR_YELLOW, format, ##__VA_ARGS__)
-#define INFO(format, ...) _log_callback(3, false, __FILE__, __LINE__, "INFO", __func__, ANSI_COLOR_GREEN, format, ##__VA_ARGS__)
-#define DEBUG(format, ...) _log_callback(4, true, __FILE__, __LINE__, "DEBUG", __func__, ANSI_COLOR_BLUE, format, ##__VA_ARGS__)
-#define TRACE(format, ...) _log_callback(5, true, __FILE__, __LINE__, "TRACE", __func__, ANSI_COLOR_CYAN, format, ##__VA_ARGS__)
+#ifndef KLOG_MODULE
+#define KLOG_MODULE "kernel"
+#endif // KLOG_MODULE
+
+// Critical logs, always present.
+#define NOTE(format, ...) _log_callback(0, false, __FILE__, __LINE__, "NOTE", KLOG_MODULE, ANSI_COLOR_MAGENTA, format, ##__VA_ARGS__)
+#define PANIC(format, ...) _log_callback(0, false, __FILE__, __LINE__, "PANIC", KLOG_MODULE, ANSI_COLOR_RED, format, ##__VA_ARGS__)
+
+// Error logs, only present if loglevels > 0.
+#define ERROR(format, ...) _log_callback(1, false, __FILE__, __LINE__, "ERROR", KLOG_MODULE, ANSI_COLOR_RED, format, ##__VA_ARGS__)
+#define WARN(format, ...) _log_callback(1, false, __FILE__, __LINE__, "WARN", KLOG_MODULE, ANSI_COLOR_YELLOW, format, ##__VA_ARGS__)
+
+// Info logs, only present if loglevels > 1.
+#define INFO(format, ...) _log_callback(2, false, __FILE__, __LINE__, "INFO", KLOG_MODULE, ANSI_COLOR_GREEN, format, ##__VA_ARGS__)
+
+// Debug logs, only present if loglevels > 2.
+#define DEBUG(format, ...) _log_callback(3, true, __FILE__, __LINE__, "DEBUG", KLOG_MODULE, ANSI_COLOR_BLUE, format, ##__VA_ARGS__)
+
+// Trace logs, only present if loglevels > 3.
+#define TRACE(format, ...) _log_callback(4, true, __FILE__, __LINE__, "TRACE", KLOG_MODULE, ANSI_COLOR_CYAN, format, ##__VA_ARGS__)
 
 void _log_callback(int log_level, bool debug, const char *file, int line, const char *level, const char *scope, const char *color, const char *format, ...);
 
