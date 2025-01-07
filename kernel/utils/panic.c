@@ -54,6 +54,9 @@ void panic(int_frame_t *frame, const char *kind, const char *message, bool halt)
 
     dump_registers(frame);
 
+    if (frame)
+        DEBUG_MARK("KRNLPANIC", "0x%.16llx", frame->rip);
+
     if (halt)
         hcf();
 }

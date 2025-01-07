@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+import sys
+import subprocess
+
+def get_closest_function(address, elf_path):
+    # Convert input address from hex string to integer
+    our_addr = int(address, 16)
+    
+    # Run 'nm' to get the list of functions and their addresses in the ELF binary
+    result = subprocess.run(['x86_64-elf-nm', elf_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    if result.returncode != 0:
+        print(f"Error running nm on {elf_path}")
+        sys.exit(1)
+
+    functions = []
+
+    # Parse the output of 'nm' to extract function addresses and names
+    for line in result.stdout.splitlines():
+        parts = line.split()
+        if len(parts) < 3:
+            continue
+
+        symbol_addr, symbol_type, symbol_name = parts[0], parts[1], parts[2]
+
+        # Only consider functions (type 'T' for text section)
+        if symbol_type not in ['T']:
+            continue
+
+        try:
+            symbol_addr_int = int(symbol_addr, 16)
+        except ValueError:
+            continue
+
+        functions.append((symbol_addr_int, symbol_name))
+
+    closest_func = None
+    min_diff = float('inf')
+
+    for func_addr, func_name in functions:
+        next_func_addr = float('inf')
+
+        for next_func_addr_candidate, _ in functions:
+            if next_func_addr_candidate > func_addr and next_func_addr_candidate < next_func_addr:
+                next_func_addr = next_func_addr_candidate
+
+        if next_func_addr == float('inf'):
+            next_func_addr = 0xFFFFFFFFFFFFFFFF
+
+        func_end_addr = next_func_addr
+
+        if func_addr <= our_addr < func_end_addr:
+            closest_func = (func_addr, func_name)
+            break
+
+        diff = abs(our_addr - func_addr)
+        if diff < min_diff:
+            min_diff = diff
+            closest_func = (func_addr, func_name)
+
+    return closest_func
+
+
+def main():
+    if len(sys.argv) != 3:
+        print("Usage: python addr2func.py <address> <elf_binary>")
+        sys.exit(1)
+
+    address = sys.argv[1]
+    elf_path = sys.argv[2]
+
+    closest_func = get_closest_function(address, elf_path)
+    if closest_func:
+        print(closest_func[1])
+    else:
+        print("No functions found.")
+
+if __name__ == "__main__":
+    main()

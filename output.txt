@@ -1,0 +1,43 @@
+[38;5;10m[boot/entry.c:129] INFO @ boot[0m: Nekonix v1.0.0-unstable-alpha
+[38;5;10m[boot/entry.c:133] INFO @ boot[0m: Kernel argument: debug=true
+[38;5;10m[boot/entry.c:133] INFO @ boot[0m: Kernel argument: loglevel=4
+[38;5;10m[boot/entry.c:133] INFO @ boot[0m: Kernel argument: mirror=true
+[38;5;12m[sys/gdt.c:32] DEBUG @ gdt[0m: GDT loaded with base=0xffffffff8000e940, limit=39
+[38;5;10m[boot/entry.c:141] INFO @ boot[0m: GDT initialized with 0 errors reported.
+[38;5;12m[sys/idt.c:99] DEBUG @ interrupts[0m: IDT loaded with base=0xffffffff8000ea20, limit=4095
+[38;5;10m[boot/entry.c:150] INFO @ boot[0m: IDT initialized with 0 errors reported.
+[38;5;12m[mm/pmm.c:25] DEBUG @ pmm[0m: ----- PMM INFO -----
+[38;5;12m[mm/pmm.c:30] DEBUG @ pmm[0m:  - USABLE ENTRY		@ 0x0000000000053000, size: 0x000000000004c000
+[38;5;12m[mm/pmm.c:30] DEBUG @ pmm[0m:  - USABLE ENTRY		@ 0x0000000000100000, size: 0x000000007fcf4000
+[38;5;12m[mm/pmm.c:30] DEBUG @ pmm[0m:  - USABLE ENTRY		@ 0x000000007ff13000, size: 0x0000000000019000
+[38;5;12m[mm/pmm.c:45] DEBUG @ pmm[0m:  - STACK START		@ 0xffff800000100000
+[38;5;12m[mm/pmm.c:63] DEBUG @ pmm[0m:  - MAX INDEX:		522586
+[38;5;12m[mm/pmm.c:64] DEBUG @ pmm[0m:  - CURRENT INDEX:		522586
+[38;5;12m[mm/pmm.c:65] DEBUG @ pmm[0m: --------------------
+[38;5;10m[boot/entry.c:171] INFO @ boot[0m: PMM initialized with 0 errors reported.
+[38;5;12m[boot/entry.c:180] DEBUG @ boot[0m: Allocated page at 0xffff80007ff2b000, value: 42
+[38;5;9m _                        _                     _      
+| | _____ _ __ _ __   ___| |  _ __   __ _ _ __ (_) ___ 
+| |/ / _ \ '__| '_ \ / _ \ | | '_ \ / _` | '_ \| |/ __|
+|   <  __/ |  | | | |  __/ | | |_) | (_| | | | | | (__ 
+|_|\_\___|_|  |_| |_|\___|_| | .__/ \__,_|_| |_|_|\___|
+                             |_|                       
+[0m
+[38;5;9m[utils/panic.c:51] PANIC @ knrlpanic[0m: #PF: Page Fault @ 0xffffffff80001710 on CPU <unknown>
+[38;5;9m[utils/panic.c:21] PANIC @ knrlpanic[0m: +--------------------+--------------------+--------------------+--------------------+
+[38;5;9m[utils/panic.c:22] PANIC @ knrlpanic[0m: |      Register      |       Value        |      Register      |       Value        |
+[38;5;9m[utils/panic.c:23] PANIC @ knrlpanic[0m: |--------------------|--------------------|--------------------|--------------------|
+[38;5;9m[utils/panic.c:24] PANIC @ knrlpanic[0m: | ds                 | 0x0000000000000010 | cr2                | 0x00000000deadbeef |
+[38;5;9m[utils/panic.c:25] PANIC @ knrlpanic[0m: | cr3                | 0x000000007ff46000 | r15                | 0x0000000000000000 |
+[38;5;9m[utils/panic.c:26] PANIC @ knrlpanic[0m: | r14                | 0x0000000000000020 | r13                | 0xffffffff80009000 |
+[38;5;9m[utils/panic.c:27] PANIC @ knrlpanic[0m: | r12                | 0x0000000000000003 | r11                | 0x0000000000000500 |
+[38;5;9m[utils/panic.c:28] PANIC @ knrlpanic[0m: | r10                | 0x000000000005a2d1 | r9                 | 0x0000000000000010 |
+[38;5;9m[utils/panic.c:29] PANIC @ knrlpanic[0m: | r8                 | 0x0000000000000000 | rbp                | 0xffff80007ff56ff0 |
+[38;5;9m[utils/panic.c:30] PANIC @ knrlpanic[0m: | rdi                | 0xffff80007ff2b000 | rsi                | 0xffff8000fd168b68 |
+[38;5;9m[utils/panic.c:31] PANIC @ knrlpanic[0m: | rdx                | 0xffff800000100000 | rcx                | 0x0000000000000000 |
+[38;5;9m[utils/panic.c:32] PANIC @ knrlpanic[0m: | rbx                | 0xffff80007ff2b000 | rax                | 0x00000000deadbeef |
+[38;5;9m[utils/panic.c:33] PANIC @ knrlpanic[0m: | vector             | 0x000000000000000e | err                | 0x0000000000000002 |
+[38;5;9m[utils/panic.c:34] PANIC @ knrlpanic[0m: | rip                | 0xffffffff80001710 | cs                 | 0x0000000000000008 |
+[38;5;9m[utils/panic.c:35] PANIC @ knrlpanic[0m: | rflags             | 0x0000000000010297 | rsp                | 0xffff80007ff56eb0 |
+[38;5;9m[utils/panic.c:36] PANIC @ knrlpanic[0m: | ss                 | 0x0000000000000010 | -                  | -                  |
+[38;5;9m[utils/panic.c:37] PANIC @ knrlpanic[0m: +--------------------+--------------------+--------------------+--------------------+

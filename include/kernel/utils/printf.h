@@ -22,6 +22,7 @@ extern int (*putchar_impl)(char c);
 int putchar(char c);
 int puts(const char *str);
 int printf(const char *format, ...);
+int s_printf(const char *format, ...);
 int vprintf(const char *format, va_list args);
 
 #endif // PRINTF_H

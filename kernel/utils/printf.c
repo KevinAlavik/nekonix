@@ -63,12 +63,40 @@ int vprintf(const char *fmt, va_list args)
     return length;
 }
 
+extern int serial_putchar(char);
+int s_vprintf(const char *fmt, va_list args)
+{
+    char buffer[1024];
+    int length = npf_vsnprintf(buffer, sizeof(buffer), fmt, args);
+
+    if (length >= 0 && length < (int)sizeof(buffer))
+    {
+        for (int i = 0; i < length; i++)
+        {
+            serial_putchar(buffer[i]);
+        }
+    }
+
+    return length;
+}
+
 int printf(const char *fmt, ...)
 {
     spinlock_acquire(&stdout_lock);
     va_list args;
     va_start(args, fmt);
     int length = vprintf(fmt, args);
+    va_end(args);
+    spinlock_release(&stdout_lock);
+    return length;
+}
+
+int s_printf(const char *fmt, ...)
+{
+    spinlock_acquire(&stdout_lock);
+    va_list args;
+    va_start(args, fmt);
+    int length = s_vprintf(fmt, args);
     va_end(args);
     spinlock_release(&stdout_lock);
     return length;

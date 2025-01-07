@@ -175,4 +175,6 @@ extern int kernel_log_level;
 extern struct flanterm_context *ft_ctx;
 extern u64 hhdm_offset;
 
+#define DEBUG_MARK(mark, fmt, ...) (s_printf("@DEBUG@%s ", mark), s_printf(fmt, ##__VA_ARGS__), s_printf("\n"))
+
 #endif
