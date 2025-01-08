@@ -3,7 +3,7 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/KevinAlavik/nekonix)
 
 > [!NOTE]
-> Nekonix (Nnix.) is a hobby project and not meant to run in production environments.
+> Nekonix is not dead! We are just working on a rewrite, check the "rewrite" branch!
 
 <img src="https://github.com/KevinAlavik/nekonix/blob/main/assets/nnix-dark.png?raw=true" width="150">
 
